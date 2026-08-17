@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recueil d'informations – Crédit Agricole Assurances</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --caa-bleu-canard: #009597;
+      --caa-vert-fonce: #006A4E;
+      --caa-orange: #ED6842;
+      --caa-vert-prairie: #9EBE38;
+      --caa-bleu-marine: #004175;
+      --caa-rouge: #ED1B2F;
+      --caa-gris-fonce: #4A4A49;
+      --caa-bleu-canard-clair: #D9EFEF;
+      --caa-vert-fonce-clair: #D9E9E4;
+      --caa-orange-clair: #FCE8E3;
+      --caa-vert-prairie-clair: #EDF5DE;
+      --caa-gris-clair: #E3E3E3;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--caa-gris-clair);
+      color: var(--caa-gris-fonce);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--caa-vert-fonce);
+      color: white;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    header .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: white;
+    }
+    header .subtitle {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .tabs-container {
+      background: white;
+      border-bottom: 3px solid var(--caa-gris-clair);
+      padding: 0 32px;
+      display: flex;
+      gap: 4px;
+    }
+    .tab-btn {
+      padding: 14px 28px;
+      border: none;
+      background: transparent;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--caa-gris-fonce);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -3px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn:hover { background: var(--caa-gris-clair); color: var(--caa-vert-fonce); }
+    .tab-btn.active { color: var(--caa-vert-fonce); border-bottom-color: var(--caa-vert-fonce); background: var(--caa-vert-fonce-clair); }
+
+    .form-panel { display: none; padding: 32px; max-width: 960px; margin: 0 auto; }
+    .form-panel.active { display: block; }
+
+    .form-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .section-header {
+      background: var(--caa-vert-fonce);
+      color: white;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header.orange { background: var(--caa-orange); }
+    .section-header.bleu { background: var(--caa-bleu-marine); }
+    .section-header.canard { background: var(--caa-bleu-canard); }
+    .section-header.prairie { background: var(--caa-vert-prairie); color: var(--caa-gris-fonce); }
+
+    .section-body { padding: 20px; }
+
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 14px; }
+    .form-row.full { grid-template-columns: 1fr; }
+    .form-row.two { grid-template-columns: 1fr 1fr; }
+    .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--caa-vert-fonce);
+      margin-bottom: 5px;
+    }
+    input[type=text], input[type=date], input[type=number], input[type=email],
+    select, textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--caa-gris-clair);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: var(--caa-gris-fonce);
+      background: #fafafa;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--caa-bleu-canard);
+      background: white;
+    }
+    textarea { resize: vertical; min-height: 70px; }
+
+    .radio-group, .checkbox-group {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 8px 0;
+    }
+    .radio-group label, .checkbox-group label {
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: var(--caa-gris-fonce);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0;
+      cursor: pointer;
+    }
+    .radio-group input, .checkbox-group input { width: auto; }
+
+    .field-label-inline {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--caa-gris-fonce);
+      margin-bottom: 6px;
+    }
+
+    .sinistre-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .sinistre-table th {
+      background: var(--caa-vert-fonce-clair);
+      color: var(--caa-vert-fonce);
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 700;
+      border: 1px solid var(--caa-gris-clair);
+    }
+    .sinistre-table td { padding: 6px; border: 1px solid var(--caa-gris-clair); }
+    .sinistre-table input { border: none; background: transparent; padding: 4px; width: 100%; font-size: 0.85rem; }
+    .sinistre-table input:focus { outline: 1px solid var(--caa-bleu-canard); background: white; }
+
+    .garanties-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .garanties-table th {
+      background: var(--caa-bleu-canard-clair);
+      color: var(--caa-bleu-marine);
+      padding: 8px 10px;
+      font-weight: 700;
+      border: 1px solid var(--caa-gris-clair);
+    }
+    .garanties-table td { padding: 6px 10px; border: 1px solid var(--caa-gris-clair); vertical-align: middle; }
+    .garanties-table tr:nth-child(even) td { background: #f8f8f8; }
+    .garanties-table input[type=text], .garanties-table input[type=number] {
+      border: 1px solid var(--caa-gris-clair);
+      border-radius: 4px;
+      padding: 5px 8px;
+      width: 100%;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--caa-vert-fonce);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 32px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+    .btn-download:hover { background: var(--caa-bleu-marine); transform: translateY(-1px); }
+    .btn-download:active { transform: translateY(0); }
+
+    .btn-reset {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--caa-rouge);
+      border: 2px solid var(--caa-rouge);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      margin-left: 12px;
+      transition: all 0.2s;
+    }
+    .btn-reset:hover { background: var(--caa-rouge); color: white; }
+
+    .actions-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 24px 0 8px 0;
+    }
+
+    .info-badge {
+      display: inline-block;
+      background: var(--caa-bleu-canard-clair);
+      color: var(--caa-bleu-marine);
+      border-radius: 5px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .subsection-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--caa-vert-fonce);
+      background: var(--caa-vert-fonce-clair);
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin: 14px 0 10px 0;
+    }
+
+    .note-field {
+      background: var(--caa-vert-prairie-clair);
+      border-left: 4px solid var(--caa-vert-prairie);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      color: var(--caa-gris-fonce);
+      margin: 8px 0;
+    }
+
+    .conditionnel { display: none; }
+    .conditionnel.visible { display: block; }
+
+    @media (max-width: 600px) {
+      .tabs-container { padding: 0 8px; }
+      .tab-btn { padding: 10px 12px; font-size: 0.8rem; }
+      .form-panel { padding: 12px; }
+      .form-row.two, .form-row.three { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">🌿 Crédit Agricole Assurances</div>
+    <div class="subtitle">Recueil d'informations – Usage interne</div>
+  </div>
+</header>
+
+<div class="tabs-container">
+  <button class="tab-btn active" onclick="showTab('agri')">🌾 Concessions agricoles</button>
+  <button class="tab-btn" onclick="showTab('flotte')">🚗 Flotte</button>
+  <button class="tab-btn" onclick="showTab('mre')">🏢 MRE</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- FORMULAIRE 1 : CONCESSIONS AGRICOLES -->
+<!-- ============================================================ -->
+<div id="tab-agri" class="form-panel active">
+
+  <!-- Section 1 : Informations générales -->
+  <div class="form-card">
+    <div class="section-header">📋 1. Informations générales</div>
+    <div class="section-body">
+      <div class="form-row two">
+        <div><label>Caisse régionale</label><input type="text" id="agri_cr" placeholder="Caisse régionale"/></div>
+        <div><label>C2AE</label><input type="text" id="agri_c2ae" placeholder="C2AE"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Visite réalisée par</label>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_visite" value="ASSURPME"/> ASSURPME</label>
+            <label><input type="radio" name="agri_visite" value="Souscripteur"/> Souscripteur</label>
+          </div>
+        </div>
+        <div><label>Date du rendez-vous</label><input type="date" id="agri_date_rdv"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Raison sociale</label><input type="text" id="agri_rs" placeholder="Raison sociale"/></div>
+        <div><label>N° SIRET</label><input type="text" id="agri_siret" placeholder="14 chiffres"/></div>
+      </div>
+      <div class="form-row three">
+        <div><label>Note BALE II</label><input type="text" id="agri_bale" placeholder="Note BALE II"/></div>
+        <div><label>N° devis Casiris</label><input type="text" id="agri_casiris" placeholder="N° devis Casiris"/></div>
+        <div><label>Date d'effet souhaitée</label><input type="date" id="agri_effet"/></div>
+      </div>
+      <div class="form-row full">
+        <div><label>Adresse complète</label><input type="text" id="agri_adresse" placeholder="Adresse, code postal, commune"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Assureur tenant</label><input type="text" id="agri_assureur" placeholder="Assureur actuel"/></div>
+        <div><label>Date d'échéance</label><input type="date" id="agri_echeance"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Budget actuel TTC (€)</label><input type="number" id="agri_budget" placeholder="€"/></div>
+        <div><label>Fractionnement</label>
+          <select id="agri_fract">
+            <option value="">Sélectionner</option>
+            <option>Annuel</option><option>Semestriel</option><option>Trimestriel</option><option>Mensuel</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2 : Antécédents -->
+  <div class="form-card">
+    <div class="section-header orange">⚠️ 2. Antécédents d'assurance</div>
+    <div class="section-body">
+      <div class="field-label-inline">Contrat résilié par l'assureur ?</div>
+      <div class="radio-group">
+        <label><input type="radio" name="agri_resil" value="oui"/> Oui</label>
+        <label><input type="radio" name="agri_resil" value="non"/> Non</label>
+      </div>
+      <div style="margin-top:12px;"><label>Motif (si résiliation)</label><input type="text" id="agri_motif_resil" placeholder="Motif de résiliation"/></div>
+      <div style="margin-top:14px;"><label>Nombre de sinistres sur 36 derniers mois</label><input type="number" id="agri_nb_sinistres" placeholder="0" style="max-width:120px"/></div>
+      <div style="margin-top:14px;">
+        <div class="field-label-inline">Détail des sinistres</div>
+        <table class="sinistre-table">
+          <thead><tr><th>Année</th><th>Origine / Nature</th><th>Mesures correctives</th><th>Coût (€)</th></tr></thead>
+          <tbody>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3 : Activités -->
+  <div class="form-card">
+    <div class="section-header bleu">🏭 3. Activités et chiffre d'affaires</div>
+    <div class="section-body">
+      <div class="form-row three">
+        <div><label>CA annuel HT – N-1 (€)</label><input type="number" id="agri_ca_n1" placeholder="€"/></div>
+        <div><label>CA annuel HT – N-2 (€)</label><input type="number" id="agri_ca_n2" placeholder="€"/></div>
+        <div><label>Activité saisonnière ?</label>
+          <div class="radio-group"><label><input type="radio" name="agri_sais" value="oui"/> Oui</label><label><input type="radio" name="agri_sais" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div class="subsection-title">Activités annexes (cocher tout ce qui s'applique)</div>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="agri_act_vente"/> Vente matériels agricoles</label>
+        <label><input type="checkbox" id="agri_act_loc"/> Location matériels</label>
+        <label><input type="checkbox" id="agri_act_sav"/> SAV / réparation</label>
+        <label><input type="checkbox" id="agri_act_station"/> Station-service</label>
+        <label><input type="checkbox" id="agri_act_lavage"/> Lavage</label>
+        <label><input type="checkbox" id="agri_act_dep"/> Dépannage</label>
+        <label><input type="checkbox" id="agri_act_moto"/> Motoculture</label>
+        <label><input type="checkbox" id="agri_act_pieces"/> Pièces détachées</label>
+      </div>
+      <div style="margin-top:12px;"><label>Détail de l'activité</label><textarea id="agri_detail_act" placeholder="Matières premières, process, produits..."></textarea></div>
+      <div class="form-row three" style="margin-top:10px;">
+        <div><label>Effectif total</label><input type="number" id="agri_effectif" placeholder="nb personnes"/></div>
+        <div><label>Dont intérimaires / CDD</label><input type="number" id="agri_interim" placeholder="nb"/></div>
+        <div><label>Masse salariale brute (€)</label><input type="number" id="agri_masse_sal" placeholder="€"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4 : Responsabilité environnementale -->
+  <div class="form-card">
+    <div class="section-header canard">🌿 4. Responsabilités particulières</div>
+    <div class="section-body">
+      <div class="field-label-inline">Installation classée pour la protection de l'environnement (ICPE) ?</div>
+      <div class="radio-group">
+        <label><input type="radio" name="agri_icpe" value="oui"/> Oui</label>
+        <label><input type="radio" name="agri_icpe" value="non"/> Non</label>
+      </div>
+      <div style="margin-top:8px;"><label>Classification ICPE (si oui)</label>
+        <select id="agri_icpe_class">
+          <option value="">Sélectionner</option>
+          <option>Déclaration</option><option>Autorisation</option><option>Enregistrement</option>
+        </select>
+      </div>
+      <div class="field-label-inline" style="margin-top:12px;">Établissement recevant du public (ERP) ?</div>
+      <div class="radio-group">
+        <label><input type="radio" name="agri_erp" value="oui"/> Oui</label>
+        <label><input type="radio" name="agri_erp" value="non"/> Non</label>
+      </div>
+      <div style="margin-top:8px;"><label>Catégorie ERP (si oui)</label>
+        <select id="agri_erp_cat"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      </div>
+      <div class="field-label-inline" style="margin-top:12px;">Utilisation de substances PFAS ?</div>
+      <div class="radio-group">
+        <label><input type="radio" name="agri_pfas" value="oui"/> Oui</label>
+        <label><input type="radio" name="agri_pfas" value="non"/> Non</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5 : Bâtiment -->
+  <div class="form-card">
+    <div class="section-header">🏗️ 5. Description du bâtiment professionnel</div>
+    <div class="section-body">
+      <div class="form-row three">
+        <div><label>Adresse du site</label><input type="text" id="agri_site_adresse" placeholder="Adresse"/></div>
+        <div><label>Surface occupée (m²)</label><input type="number" id="agri_surf_occ" placeholder="m²"/></div>
+        <div><label>Surface totale (m²)</label><input type="number" id="agri_surf_tot" placeholder="m²"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Qualité de l'occupant</label>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_occup" value="Propriétaire"/> Propriétaire</label>
+            <label><input type="radio" name="agri_occup" value="Locataire"/> Locataire</label>
+          </div>
+        </div>
+        <div><label>Année de construction</label><input type="number" id="agri_annee_const" placeholder="ex: 1998"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Ossature</label>
+          <select id="agri_ossature">
+            <option value="">Sélectionner</option>
+            <option>1 – Maçonnerie</option>
+            <option>2 – Acier protégé ou bois lamellé collé</option>
+            <option>3 – Acier non protégé ou bois massif</option>
+            <option>4 – Panneaux sandwich autoporteurs</option>
+          </select>
+        </div>
+        <div><label>Murs extérieurs</label>
+          <select id="agri_murs">
+            <option value="">Sélectionner</option>
+            <option>1 – Maçonnerie / pierres / parpaings</option>
+            <option>2 – Bac acier (double peau isolant minéral)</option>
+            <option>3 – PVC / bac acier avec isolant combustible / bois</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div><label>Couverture</label>
+          <select id="agri_couv">
+            <option value="">Sélectionner</option>
+            <option>1 – Béton / acier / fibrociment / ardoises / tuiles (support incombustible)</option>
+            <option>2 – Béton avec isolant mousse / acier avec étanchéité</option>
+            <option>3 – Ardoises ou tuiles sur support combustible</option>
+            <option>4 – Acier avec isolant combustible / bois / matières plastiques</option>
+          </select>
+        </div>
+        <div><label>Nombre de niveaux</label>
+          <select id="agri_niveaux">
+            <option value="">Sélectionner</option>
+            <option>A – Simple RDC</option>
+            <option>B – 2 à 5 niveaux (plancher haut ≤ 28m)</option>
+            <option>C – Plus de 5 niveaux ou plancher haut > 28m</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div><label>Panneaux photovoltaïques (PPV) ?</label>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_ppv" value="oui" onclick="toggleCond('agri_ppv_details')"/> Oui</label>
+            <label><input type="radio" name="agri_ppv" value="non" onclick="hideCond('agri_ppv_details')"/> Non</label>
+          </div>
+        </div>
+        <div><label>IRVE (bornes de recharge) ?</label>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_irve" value="oui"/> Oui</label>
+            <label><input type="radio" name="agri_irve" value="non"/> Non</label>
+          </div>
+        </div>
+      </div>
+      <div id="agri_ppv_details" class="conditionnel" style="background:var(--caa-orange-clair);padding:12px;border-radius:6px;margin-top:8px;">
+        <div class="form-row two">
+          <div><label>Superficie PPV (m²)</label><input type="number" id="agri_ppv_surf" placeholder="m²"/></div>
+          <div><label>Date d'installation</label><input type="date" id="agri_ppv_date"/></div>
+        </div>
+        <div class="form-row two">
+          <div><label>Contrat de maintenance ?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="agri_ppv_maint" value="oui"/> Oui</label>
+              <label><input type="radio" name="agri_ppv_maint" value="non"/> Non</label>
+            </div>
+          </div>
+          <div><label>Destination production</label>
+            <div class="radio-group">
+              <label><input type="radio" name="agri_ppv_dest" value="Autoconsommation"/> Autoconsommation</label>
+              <label><input type="radio" name="agri_ppv_dest" value="Revente"/> Revente</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:10px;">
+        <div><label>Chauffage des locaux</label>
+          <select id="agri_chauffage">
+            <option value="">Sélectionner</option>
+            <option>Chauffage centralisé</option>
+            <option>Chauffage décentralisé – radiateurs</option>
+            <option>Chauffage décentralisé – aérothermes</option>
+            <option>Climatisation réversible</option>
+            <option>Non chauffé</option>
+          </select>
+        </div>
+        <div><label>Compartimentage</label>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_compart" value="oui"/> Oui</label>
+            <label><input type="radio" name="agri_compart" value="non"/> Non</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6 : Prévention incendie -->
+  <div class="form-card">
+    <div class="section-header orange">🔥 6. Prévention et protection incendie</div>
+    <div class="section-body">
+      <div class="subsection-title">Moyens de prévention</div>
+      <table class="garanties-table" style="font-size:0.83rem;">
+        <thead><tr><th>Équipement</th><th>Présence</th><th>Vérif. annuelle</th><th>Certificat</th><th>Anomalies corrigées</th></tr></thead>
+        <tbody>
+          <tr><td>Électricité (Q18)</td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_elec_p" value="oui"/>Oui</label><label><input type="radio" name="prev_elec_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_elec_v" value="oui"/>Oui</label><label><input type="radio" name="prev_elec_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_elec_a" value="oui"/>Oui</label><label><input type="radio" name="prev_elec_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Extincteurs (Q4)</td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_ext_p" value="oui"/>Oui</label><label><input type="radio" name="prev_ext_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_ext_v" value="oui"/>Oui</label><label><input type="radio" name="prev_ext_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_ext_a" value="oui"/>Oui</label><label><input type="radio" name="prev_ext_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>RIA – Robinets incendie armés (Q5)</td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_ria_p" value="oui"/>Oui</label><label><input type="radio" name="prev_ria_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_ria_v" value="oui"/>Oui</label><label><input type="radio" name="prev_ria_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_ria_a" value="oui"/>Oui</label><label><input type="radio" name="prev_ria_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Détection automatique incendie (Q7)</td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_dai_p" value="oui"/>Oui</label><label><input type="radio" name="prev_dai_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_dai_v" value="oui"/>Oui</label><label><input type="radio" name="prev_dai_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_dai_a" value="oui"/>Oui</label><label><input type="radio" name="prev_dai_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Extinction automatique – sprinklers (Q1)</td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_sprk_p" value="oui"/>Oui</label><label><input type="radio" name="prev_sprk_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_sprk_v" value="oui"/>Oui</label><label><input type="radio" name="prev_sprk_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_sprk_a" value="oui"/>Oui</label><label><input type="radio" name="prev_sprk_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Exutoires de fumées (Q17)</td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_fum_p" value="oui"/>Oui</label><label><input type="radio" name="prev_fum_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_fum_v" value="oui"/>Oui</label><label><input type="radio" name="prev_fum_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_fum_a" value="oui"/>Oui</label><label><input type="radio" name="prev_fum_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Thermographie infrarouge (Q19)</td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_thermo_p" value="oui"/>Oui</label><label><input type="radio" name="prev_thermo_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_thermo_v" value="oui"/>Oui</label><label><input type="radio" name="prev_thermo_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="prev_thermo_a" value="oui"/>Oui</label><label><input type="radio" name="prev_thermo_a" value="non"/>Non</label></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:14px;">
+        <div class="field-label-inline">Personnel formé à la manipulation des moyens de protection incendie ?</div>
+        <div class="radio-group">
+          <label><input type="radio" name="agri_form_inc" value="oui"/> Oui</label>
+          <label><input type="radio" name="agri_form_inc" value="non"/> Non</label>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:10px;">
+        <div><label>Nombre d'équipiers formés</label><input type="number" id="agri_nb_equip" placeholder="nb"/></div>
+        <div><label>Date dernière formation incendie</label><input type="date" id="agri_date_form"/></div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="field-label-inline">Procédure de PERMIS DE FEU connue et appliquée ?</div>
+        <div class="radio-group">
+          <label><input type="radio" name="agri_permis_feu" value="oui"/> Oui</label>
+          <label><input type="radio" name="agri_permis_feu" value="non"/> Non</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7 : Protection vol -->
+  <div class="form-card">
+    <div class="section-header canard">🔒 7. Moyens de protection vol / intrusion</div>
+    <div class="section-body">
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Site entièrement clôturé avec grillage et portail ?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_cloture" value="oui"/> Oui</label>
+            <label><input type="radio" name="agri_cloture" value="non"/> Non</label>
+          </div>
+          <div style="margin-top:6px;"><label>Précisez (hauteur, type)</label><input type="text" id="agri_cloture_detail" placeholder="ex: grillage 2m + portail coulissant"/></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Gardiennage pendant les heures de fermeture ?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_garden" value="oui"/> Oui</label>
+            <label><input type="radio" name="agri_garden" value="non"/> Non</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:10px;">
+        <div>
+          <div class="field-label-inline">Protection mécanique ?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_prot_meca" value="oui"/> Oui</label>
+            <label><input type="radio" name="agri_prot_meca" value="non"/> Non</label>
+          </div>
+          <label style="margin-top:6px;">Précisez</label><input type="text" id="agri_prot_meca_det" placeholder="ex: portes blindées, coffres..."/>
+        </div>
+        <div>
+          <div class="field-label-inline">Protection électronique ?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="agri_prot_elec" value="oui"/> Oui</label>
+            <label><input type="radio" name="agri_prot_elec" value="non"/> Non</label>
+          </div>
+          <div class="checkbox-group" style="margin-top:6px;">
+            <label><input type="checkbox" id="agri_vol_vol"/> Volumétrique</label>
+            <label><input type="checkbox" id="agri_vol_peri"/> Périmétrique</label>
+            <label><input type="checkbox" id="agri_vol_periph"/> Périphérique</label>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="field-label-inline">Report d'alarme ?</div>
+        <div class="radio-group">
+          <label><input type="radio" name="agri_report" value="oui"/> Oui</label>
+          <label><input type="radio" name="agri_report" value="non"/> Non</label>
+        </div>
+        <div class="checkbox-group" style="margin-top:6px;">
+          <label><input type="checkbox" id="agri_rep_dir"/> Vers dirigeant</label>
+          <label><input type="checkbox" id="agri_rep_tele"/> Vers société de télésurveillance</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8 : Garanties et capitaux -->
+  <div class="form-card">
+    <div class="section-header">💰 8. Garanties, capitaux et franchises</div>
+    <div class="section-body">
+      <div class="subsection-title">Dommages aux biens</div>
+      <table class="garanties-table">
+        <thead><tr><th>Garantie</th><th>À souscrire</th><th>Capitaux (€)</th><th>Franchise</th></tr></thead>
+        <tbody>
+          <tr><td>Incendie et risques annexes <span class="info-badge">OBLIGATOIRE</span></td><td>–</td><td><input type="text" placeholder="Bâtiment / Matériels / Marchands"/></td><td><input type="text" placeholder="franchise"/></td></tr>
+          <tr><td>Vol / Vandalisme</td><td><div class="radio-group"><label><input type="radio" name="gar_vol" value="oui"/>Oui</label><label><input type="radio" name="gar_vol" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Dégâts des eaux / Gel / Refoulement</td><td><div class="radio-group"><label><input type="radio" name="gar_dde" value="oui"/>Oui</label><label><input type="radio" name="gar_dde" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Bris de glaces</td><td><div class="radio-group"><label><input type="radio" name="gar_bdg" value="oui"/>Oui</label><label><input type="radio" name="gar_bdg" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Dommages électriques / TRI</td><td><div class="radio-group"><label><input type="radio" name="gar_elec" value="oui"/>Oui</label><label><input type="radio" name="gar_elec" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Bris de machines</td><td><div class="radio-group"><label><input type="radio" name="gar_bm" value="oui"/>Oui</label><label><input type="radio" name="gar_bm" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Perte d'exploitation</td><td><div class="radio-group"><label><input type="radio" name="gar_pe" value="oui"/>Oui</label><label><input type="radio" name="gar_pe" value="non"/>Non</label></div></td><td><input type="text" placeholder="Marge brute annuelle"/></td><td><input type="text" placeholder="Période d'indemnisation"/></td></tr>
+          <tr><td>RC Exploitation <span class="info-badge">OBLIGATOIRE</span></td><td>–</td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>RC Après livraison</td><td><div class="radio-group"><label><input type="radio" name="gar_rcal" value="oui"/>Oui</label><label><input type="radio" name="gar_rcal" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>RC Professionnelle</td><td><div class="radio-group"><label><input type="radio" name="gar_rcp" value="oui"/>Oui</label><label><input type="radio" name="gar_rcp" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Section 9 : Parc automobile -->
+  <div class="form-card">
+    <div class="section-header prairie">🚗 9. Parc automobile (W garage)</div>
+    <div class="section-body">
+      <table class="garanties-table">
+        <thead><tr><th>Catégorie</th><th>Nombre</th><th>Valeur unitaire estimée (€)</th></tr></thead>
+        <tbody>
+          <tr><td>Véhicules confiés par clients</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td></tr>
+          <tr><td>Véhicules en vente (stock)</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td></tr>
+          <tr><td>Véhicules d'exploitation</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td></tr>
+          <tr><td>Véhicules du/des dirigeant(s)</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;"><label>Notes complémentaires</label><textarea id="agri_notes" placeholder="Toute information complémentaire utile..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="actions-bar">
+    <button class="btn-download" onclick="downloadPDF('agri')">⬇️ Télécharger en PDF</button>
+    <button class="btn-reset" onclick="resetForm('agri')">🗑️ Réinitialiser</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FORMULAIRE 2 : FLOTTE -->
+<!-- ============================================================ -->
+<div id="tab-flotte" class="form-panel">
+
+  <div class="form-card">
+    <div class="section-header bleu">📋 1. Informations générales</div>
+    <div class="section-body">
+      <div class="form-row two">
+        <div><label>Caisse régionale</label><input type="text" id="fl_cr" placeholder="Caisse régionale"/></div>
+        <div><label>N° devis Casiris</label><input type="text" id="fl_casiris" placeholder="N° devis"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Raison sociale</label><input type="text" id="fl_rs" placeholder="Raison sociale"/></div>
+        <div><label>N° SIRET</label><input type="text" id="fl_siret" placeholder="14 chiffres"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Secteur d'activité</label><input type="text" id="fl_secteur" placeholder="Secteur d'activité"/></div>
+        <div><label>Note BALE II</label><input type="text" id="fl_bale" placeholder="Note BALE II"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Assureur tenant</label><input type="text" id="fl_assureur" placeholder="Assureur actuel"/></div>
+        <div><label>Budget actuel TTC (€)</label><input type="number" id="fl_budget" placeholder="€"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Date d'échéance</label><input type="date" id="fl_echeance"/></div>
+        <div><label>Date d'effet souhaitée</label><input type="date" id="fl_effet"/></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="section-header orange">⚠️ 2. Antécédents</div>
+    <div class="section-body">
+      <div class="field-label-inline">Contrat résilié par l'assureur ?</div>
+      <div class="radio-group"><label><input type="radio" name="fl_resil" value="oui"/> Oui</label><label><input type="radio" name="fl_resil" value="non"/> Non</label></div>
+      <div style="margin-top:10px;"><label>Sinistres sur 36 mois (nombre)</label><input type="number" id="fl_nb_sin" placeholder="0" style="max-width:120px"/></div>
+      <div style="margin-top:12px;">
+        <table class="sinistre-table">
+          <thead><tr><th>Année</th><th>Nature du sinistre</th><th>Véhicule impliqué</th><th>Coût (€)</th></tr></thead>
+          <tbody>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="section-header">🚘 3. Composition de la flotte</div>
+    <div class="section-body">
+      <table class="garanties-table">
+        <thead><tr><th>Catégorie de véhicule</th><th>Nombre</th><th>Valeur totale (€)</th><th>Usage principal</th></tr></thead>
+        <tbody>
+          <tr><td>Véhicules légers (VL)</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td><td><input type="text" placeholder="ex: déplacement commercial"/></td></tr>
+          <tr><td>Véhicules utilitaires légers (VUL)</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td><td><input type="text"/></td></tr>
+          <tr><td>Poids lourds (PL)</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td><td><input type="text"/></td></tr>
+          <tr><td>Engins de chantier / agricoles</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td><td><input type="text"/></td></tr>
+          <tr><td>Deux-roues</td><td><input type="number" placeholder="0"/></td><td><input type="number" placeholder="€"/></td><td><input type="text"/></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;"><label>Usage géographique</label>
+        <div class="radio-group">
+          <label><input type="radio" name="fl_geo" value="France"/> France uniquement</label>
+          <label><input type="radio" name="fl_geo" value="Europe"/> Europe</label>
+          <label><input type="radio" name="fl_geo" value="International"/> International</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="section-header canard">🛡️ 4. Garanties souhaitées</div>
+    <div class="section-body">
+      <table class="garanties-table">
+        <thead><tr><th>Garantie</th><th>À souscrire</th><th>Franchise souhaitée</th></tr></thead>
+        <tbody>
+          <tr><td>Responsabilité civile <span class="info-badge">OBLIGATOIRE</span></td><td>–</td><td><input type="text" placeholder="franchise"/></td></tr>
+          <tr><td>Tous risques collision</td><td><div class="radio-group"><label><input type="radio" name="fl_trc" value="oui"/>Oui</label><label><input type="radio" name="fl_trc" value="non"/>Non</label></div></td><td><input type="text"/></td></tr>
+          <tr><td>Bris de glace</td><td><div class="radio-group"><label><input type="radio" name="fl_bdg" value="oui"/>Oui</label><label><input type="radio" name="fl_bdg" value="non"/>Non</label></div></td><td><input type="text"/></td></tr>
+          <tr><td>Vol / Incendie</td><td><div class="radio-group"><label><input type="radio" name="fl_vi" value="oui"/>Oui</label><label><input type="radio" name="fl_vi" value="non"/>Non</label></div></td><td><input type="text"/></td></tr>
+          <tr><td>Protection du conducteur</td><td><div class="radio-group"><label><input type="radio" name="fl_pdc" value="oui"/>Oui</label><label><input type="radio" name="fl_pdc" value="non"/>Non</label></div></td><td><input type="text"/></td></tr>
+          <tr><td>Assistance / Remorquage</td><td><div class="radio-group"><label><input type="radio" name="fl_assist" value="oui"/>Oui</label><label><input type="radio" name="fl_assist" value="non"/>Non</label></div></td><td><input type="text"/></td></tr>
+          <tr><td>Marchandises transportées</td><td><div class="radio-group"><label><input type="radio" name="fl_march" value="oui"/>Oui</label><label><input type="radio" name="fl_march" value="non"/>Non</label></div></td><td><input type="text"/></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;"><label>Notes complémentaires</label><textarea id="fl_notes" placeholder="Toute information utile..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="actions-bar">
+    <button class="btn-download" onclick="downloadPDF('flotte')">⬇️ Télécharger en PDF</button>
+    <button class="btn-reset" onclick="resetForm('flotte')">🗑️ Réinitialiser</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FORMULAIRE 3 : MRE (Questionnaire Général Risque Entreprise) -->
+<!-- ============================================================ -->
+<div id="tab-mre" class="form-panel">
+
+  <!-- Section 1 : Infos générales -->
+  <div class="form-card">
+    <div class="section-header">📋 1. Informations générales sur l'entreprise</div>
+    <div class="section-body">
+      <div class="form-row two">
+        <div><label>Nom du dossier</label><input type="text" id="mre_dossier" placeholder="Nom du dossier"/></div>
+        <div><label>N° devis Casiris</label><input type="text" id="mre_casiris" placeholder="N° devis Casiris"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Caisse régionale</label><input type="text" id="mre_cr" placeholder="Caisse régionale"/></div>
+        <div><label>ASSURPME</label><input type="text" id="mre_assurpme" placeholder="ASSURPME"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Date du rendez-vous</label><input type="date" id="mre_date_rdv"/></div>
+        <div><label>Visite réalisée par</label>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_visite" value="ASSURPME"/> ASSURPME</label>
+            <label><input type="radio" name="mre_visite" value="Souscripteur"/> Souscripteur</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div><label>Raison sociale</label><input type="text" id="mre_rs" placeholder="Raison sociale"/></div>
+        <div><label>Nom du représentant légal</label><input type="text" id="mre_repr" placeholder="Prénom NOM"/></div>
+      </div>
+      <div class="form-row three">
+        <div><label>Forme juridique</label><input type="text" id="mre_forme" placeholder="SARL, SAS, SA..."/></div>
+        <div><label>Date de création</label><input type="date" id="mre_creation"/></div>
+        <div><label>N° SIRET</label><input type="text" id="mre_siret" placeholder="14 chiffres"/></div>
+      </div>
+      <div class="form-row full">
+        <div><label>Adresse du siège social</label><input type="text" id="mre_adresse" placeholder="Adresse complète"/></div>
+      </div>
+      <div class="form-row three">
+        <div><label>Code postal</label><input type="text" id="mre_cp" placeholder="Code postal"/></div>
+        <div><label>Commune</label><input type="text" id="mre_commune" placeholder="Commune"/></div>
+        <div><label>Code NAF (bancaire)</label><input type="text" id="mre_naf" placeholder="ex: 4520A"/></div>
+      </div>
+      <div class="form-row three">
+        <div><label>Note BALE II</label><input type="text" id="mre_bale" placeholder="Note BALE II"/></div>
+        <div><label>Assureur tenant</label><input type="text" id="mre_assureur" placeholder="Assureur actuel"/></div>
+        <div><label>Date d'échéance</label><input type="date" id="mre_echeance"/></div>
+      </div>
+      <div class="form-row three">
+        <div><label>Durée de préavis</label><input type="text" id="mre_preavis" placeholder="ex: 3 mois"/></div>
+        <div><label>Budget actuel TTC (€)</label><input type="number" id="mre_budget" placeholder="€"/></div>
+        <div><label>Date d'effet souhaitée</label><input type="date" id="mre_effet"/></div>
+      </div>
+      <div class="form-row two">
+        <div><label>Fractionnement</label>
+          <select id="mre_fract">
+            <option value="">Sélectionner</option>
+            <option>Annuel</option><option>Semestriel</option><option>Trimestriel</option><option>Mensuel</option>
+          </select>
+        </div>
+        <div>
+          <label>Autres offres étudiées</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" id="mre_off_flotte"/> Flotte</label>
+            <label><input type="checkbox" id="mre_off_cyber"/> Cyber</label>
+            <label><input type="checkbox" id="mre_off_rcms"/> RCMS</label>
+            <label><input type="checkbox" id="mre_off_do"/> Dommage ouvrage</label>
+            <label><input type="checkbox" id="mre_off_rd"/> Resp. décennale</label>
+          </div>
+        </div>
+      </div>
+      <div><label>Contexte commercial et bancaire</label><textarea id="mre_contexte" placeholder="Contexte commercial et bancaire..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Section 2 : Antécédents -->
+  <div class="form-card">
+    <div class="section-header orange">⚠️ 2. Déclarations et antécédents</div>
+    <div class="section-body">
+      <div class="field-label-inline">Le précédent contrat a-t-il été résilié par l'assureur ?</div>
+      <div class="radio-group">
+        <label><input type="radio" name="mre_resil" value="oui"/> Oui</label>
+        <label><input type="radio" name="mre_resil" value="non"/> Non</label>
+      </div>
+      <div style="margin-top:8px;"><label>Motif (si résiliation)</label><input type="text" id="mre_motif_resil" placeholder="Motif de résiliation"/></div>
+      <div style="margin-top:10px;"><label>Nombre de sinistres déclarés sur les 36 derniers mois</label><input type="number" id="mre_nb_sin" placeholder="0" style="max-width:120px"/></div>
+      <div style="margin-top:12px;">
+        <div class="field-label-inline">Détail des sinistres</div>
+        <table class="sinistre-table">
+          <thead><tr><th>Année</th><th>Origine / Nature</th><th>Mesures correctives</th><th>Coût (€)</th></tr></thead>
+          <tbody>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="AAAA"/></td><td><input type="text"/></td><td><input type="text"/></td><td><input type="number"/></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="field-label-inline">Au cours des 10 dernières années, sanction ou mise en demeure pour infraction au Code du travail ?</div>
+        <div class="radio-group">
+          <label><input type="radio" name="mre_sanction" value="oui"/> Oui</label>
+          <label><input type="radio" name="mre_sanction" value="non"/> Non</label>
+        </div>
+      </div>
+      <div style="margin-top:8px;"><label>Notes</label><textarea id="mre_notes_decl" placeholder="Notes..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Section 3 : RC Générale / Activités -->
+  <div class="form-card">
+    <div class="section-header bleu">🏭 3. Responsabilité civile générale – Activités</div>
+    <div class="section-body">
+      <div class="form-row three">
+        <div><label>CA annuel HT – année N-1 (€)</label><input type="number" id="mre_ca_n1" placeholder="€"/></div>
+        <div><label>CA annuel HT – année N-2 (€)</label><input type="number" id="mre_ca_n2" placeholder="€"/></div>
+        <div><label>Activité saisonnière ?</label>
+          <div class="radio-group"><label><input type="radio" name="mre_sais" value="oui"/> Oui</label><label><input type="radio" name="mre_sais" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;"><label>Répartition du CA HT – Détail des activités</label>
+        <table class="garanties-table" style="margin-top:6px;">
+          <thead><tr><th>Activité</th><th>France (€)</th><th>Export Hors USA/Canada/Aus.</th><th>Export Direct USA/Canada/Aus.</th><th>Sous-traité (%)</th></tr></thead>
+          <tbody>
+            <tr><td><input type="text" placeholder="Activité 1"/></td><td><input type="number"/></td><td><input type="number"/></td><td><input type="number"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="Activité 2"/></td><td><input type="number"/></td><td><input type="number"/></td><td><input type="number"/></td><td><input type="number"/></td></tr>
+            <tr><td><input type="text" placeholder="Activité 3"/></td><td><input type="number"/></td><td><input type="number"/></td><td><input type="number"/></td><td><input type="number"/></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;"><label>Détail de l'activité</label><textarea id="mre_detail_act" placeholder="Matières premières, process, produits fabriqués, activité bureau d'étude, prestations sur biens confiés..."></textarea></div>
+      <div class="form-row three" style="margin-top:10px;">
+        <div><label>Effectif total</label><input type="number" id="mre_effectif" placeholder="nb personnes"/></div>
+        <div><label>Dont intérimaires / CDD</label><input type="number" id="mre_interim" placeholder="nb"/></div>
+        <div><label>Masse salariale brute (€)</label><input type="number" id="mre_masse_sal" placeholder="€"/></div>
+      </div>
+      <div class="form-row two" style="margin-top:10px;">
+        <div>
+          <div class="field-label-inline">Document Unique d'Évaluation des Risques (DUERP) ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_duerp" value="oui"/> Oui</label><label><input type="radio" name="mre_duerp" value="non"/> Non</label></div>
+          <label style="margin-top:6px;">Date de dernière mise à jour</label><input type="date" id="mre_duerp_date"/>
+        </div>
+        <div>
+          <label>Présence sur site – Équipes</label>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_equipe" value="1x8h"/> 1×8h</label>
+            <label><input type="radio" name="mre_equipe" value="2x8h"/> 2×8h</label>
+            <label><input type="radio" name="mre_equipe" value="3x8h"/> 3×8h</label>
+          </div>
+          <label style="margin-top:6px;">Nombre de jours</label>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_jours" value="5/7"/> 5/7j</label>
+            <label><input type="radio" name="mre_jours" value="6/7"/> 6/7j</label>
+            <label><input type="radio" name="mre_jours" value="7/7"/> 7/7j</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:10px;">
+        <div>
+          <div class="field-label-inline">Fermeture annuelle des locaux ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_ferm" value="oui"/> Oui</label><label><input type="radio" name="mre_ferm" value="non"/> Non</label></div>
+          <label>Durée (semaines) + objet</label><input type="text" id="mre_ferm_duree" placeholder="ex: 3 semaines – congés"/>
+        </div>
+        <div><label>Amplitude horaire de présence sur site</label><input type="text" id="mre_amplitude" placeholder="ex: 7h-19h"/></div>
+      </div>
+      <div style="margin-top:10px;"><label>Principaux fournisseurs / sous-traitants (pays, nature des produits)</label><textarea id="mre_fournisseurs" placeholder="Fournisseurs, pays de provenance..."></textarea></div>
+      <div class="form-row two" style="margin-top:8px;">
+        <div>
+          <div class="field-label-inline">Un fournisseur représente-t-il plus de 25% des approvisionnements ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_fourn25" value="oui"/> Oui</label><label><input type="radio" name="mre_fourn25" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Attestations RC demandées annuellement aux sous-traitants ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_attest" value="oui"/> Oui</label><label><input type="radio" name="mre_attest" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;"><label>Principaux clients</label><textarea id="mre_clients" placeholder="Principaux clients..."></textarea></div>
+      <div style="margin-top:8px;">
+        <div class="field-label-inline">Un client représente-t-il plus de 25% du CA annuel ?</div>
+        <div class="radio-group"><label><input type="radio" name="mre_client25" value="oui"/> Oui</label><label><input type="radio" name="mre_client25" value="non"/> Non</label></div>
+      </div>
+      <div class="subsection-title">Domaines d'activité des produits / interventions</div>
+      <div class="checkbox-group">
+        <label><input type="checkbox"/> Automobile</label>
+        <label><input type="checkbox"/> Médical</label>
+        <label><input type="checkbox"/> Construction</label>
+        <label><input type="checkbox"/> Aéronautique/Spatial</label>
+        <label><input type="checkbox"/> Pharmaceutique</label>
+        <label><input type="checkbox"/> Plasturgie</label>
+        <label><input type="checkbox"/> Nucléaire</label>
+        <label><input type="checkbox"/> Agroalimentaire</label>
+        <label><input type="checkbox"/> Mécanique</label>
+        <label><input type="checkbox"/> Maritime/Naval</label>
+        <label><input type="checkbox"/> Autres</label>
+      </div>
+      <div class="form-row two" style="margin-top:10px;">
+        <div>
+          <div class="field-label-inline">Réalisation de travaux chez des tiers ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_travtiers" value="oui"/> Oui</label><label><input type="radio" name="mre_travtiers" value="non"/> Non</label></div>
+          <label>% du CA concerné</label>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_travtiers_pct" value="<10%"/> &lt; 10%</label>
+            <label><input type="radio" name="mre_travtiers_pct" value="<30%"/> &lt; 30%</label>
+            <label><input type="radio" name="mre_travtiers_pct" value=">30%"/> &gt; 30%</label>
+          </div>
+        </div>
+        <div>
+          <div class="field-label-inline">Engins de chantier utilisés ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_engins" value="oui"/> Oui</label><label><input type="radio" name="mre_engins" value="non"/> Non</label></div>
+          <div class="field-label-inline" style="margin-top:10px;">Nom/marque apposé sur produits vendus ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_marque" value="oui"/> Oui</label><label><input type="radio" name="mre_marque" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:8px;">
+        <div>
+          <div class="field-label-inline">Démarche qualité mise en place ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_qualite" value="oui"/> Oui</label><label><input type="radio" name="mre_qualite" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Certifications / agréments (ISO, HACCP, NF…) ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_cert" value="oui"/> Oui</label><label><input type="radio" name="mre_cert" value="non"/> Non</label></div>
+          <label>Précisez</label><input type="text" id="mre_cert_det" placeholder="ex: ISO 9001, HACCP..."/>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:8px;">
+        <div>
+          <div class="field-label-inline">Documents contractuels validés par conseil juridique ?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_juridique" value="oui"/> Oui</label>
+            <label><input type="radio" name="mre_juridique" value="non"/> Non</label>
+          </div>
+          <div class="radio-group" style="margin-top:4px;">
+            <label><input type="radio" name="mre_juridique_type" value="externe"/> Externe</label>
+            <label><input type="radio" name="mre_juridique_type" value="interne"/> Interne</label>
+          </div>
+        </div>
+        <div>
+          <div class="field-label-inline">ICPE (Installation Classée pour Protection de l'Environnement) ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_icpe" value="oui"/> Oui</label><label><input type="radio" name="mre_icpe" value="non"/> Non</label></div>
+          <label>Classification</label>
+          <select id="mre_icpe_class"><option value="">–</option><option>Déclaration</option><option>Autorisation</option><option>Enregistrement</option></select>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:8px;">
+        <div>
+          <div class="field-label-inline">ERP (Établissement Recevant du Public) ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_erp" value="oui"/> Oui</label><label><input type="radio" name="mre_erp" value="non"/> Non</label></div>
+          <label>Catégorie ERP</label>
+          <select id="mre_erp_cat"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        </div>
+        <div>
+          <div class="field-label-inline">Utilisation de substances PFAS ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_pfas" value="oui"/> Oui</label><label><input type="radio" name="mre_pfas" value="non"/> Non</label></div>
+          <div class="field-label-inline" style="margin-top:10px;">Démarche RSE ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_rse" value="oui"/> Oui</label><label><input type="radio" name="mre_rse" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div style="margin-top:8px;"><label>Actions RSE concrètes menées</label><textarea id="mre_rse_detail" placeholder="Environnement, économique, sociale/sociétale..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Section 4 : RC -->
+  <div class="form-card">
+    <div class="section-header canard">🛡️ 4. Responsabilité civile</div>
+    <div class="section-body">
+      <div class="field-label-inline">Garanties RC à souscrire</div>
+      <table class="garanties-table" style="margin-top:8px;">
+        <thead><tr><th>Garantie</th><th>À souscrire</th><th>Montant de garantie (€)</th><th>Franchise</th></tr></thead>
+        <tbody>
+          <tr><td>RC Exploitation / Avant livraison <span class="info-badge">OBLIGATOIRE</span></td><td>–</td><td><input type="text" placeholder="montant"/></td><td><input type="text" placeholder="franchise"/></td></tr>
+          <tr><td>RC Après livraison</td><td><div class="radio-group"><label><input type="radio" name="mre_rcal" value="oui"/>Oui</label><label><input type="radio" name="mre_rcal" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>RC Professionnelle</td><td><div class="radio-group"><label><input type="radio" name="mre_rcp" value="oui"/>Oui</label><label><input type="radio" name="mre_rcp" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;"><label>Notes RC (valeur max biens confiés / en dépôt...)</label><textarea id="mre_rc_notes" placeholder="Notes..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Section 5 : Site et bâtiment -->
+  <div class="form-card">
+    <div class="section-header">🏗️ 5. Site et description du bâtiment</div>
+    <div class="section-body">
+      <div class="form-row two">
+        <div><label>Adresse du site</label><input type="text" id="mre_site_adresse" placeholder="Adresse du site"/></div>
+        <div><label>Intitulé du site (CASIRIS)</label><input type="text" id="mre_site_casiris" placeholder="Intitulé CASIRIS"/></div>
+      </div>
+      <div class="subsection-title">Implantation</div>
+      <div class="checkbox-group">
+        <label><input type="radio" name="mre_impl" value="Zone urbaine"/> Zone urbaine</label>
+        <label><input type="radio" name="mre_impl" value="Zone industrielle"/> Zone industrielle ou commerciale</label>
+        <label><input type="radio" name="mre_impl" value="Zone rurale"/> Zone rurale</label>
+        <label><input type="radio" name="mre_impl" value="Galerie >3000"/> Galerie marchande &gt; 3 000 m²</label>
+        <label><input type="radio" name="mre_impl" value="Galerie <3000"/> Galerie marchande &lt; 3 000 m²</label>
+        <label><input type="radio" name="mre_impl" value="IGH"/> IGH</label>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="field-label-inline">Inondation au cours des 10 dernières années ?</div>
+        <div class="radio-group"><label><input type="radio" name="mre_inond" value="oui"/> Oui</label><label><input type="radio" name="mre_inond" value="non"/> Non</label></div>
+      </div>
+      <div style="margin-top:8px;"><label>Activités voisines</label><input type="text" id="mre_voisins" placeholder="ex: entrepôt logistique, station essence..."/></div>
+      <div class="subsection-title">Occupation</div>
+      <div class="form-row two">
+        <div><label>Surface occupée (m²)</label><input type="number" id="mre_surf_occ" placeholder="m²"/></div>
+        <div><label>Surface totale du bâtiment (m²)</label><input type="number" id="mre_surf_tot" placeholder="m²"/></div>
+      </div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Qualité de l'occupant</div>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_proprio" value="Propriétaire"/> Propriétaire</label>
+            <label><input type="radio" name="mre_proprio" value="Locataire"/> Locataire</label>
+          </div>
+        </div>
+        <div>
+          <div class="field-label-inline">Assurance pour compte ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_apc" value="oui"/> Oui</label><label><input type="radio" name="mre_apc" value="non"/> Non</label></div>
+          <label>Nom du propriétaire</label><input type="text" id="mre_nom_proprio" placeholder="Nom propriétaire"/>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Renonciation à recours ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_renonc" value="oui"/> Oui</label><label><input type="radio" name="mre_renonc" value="non"/> Non</label></div>
+        </div>
+        <div><label>Dispositions du bail (RL / propriétaire...)</label><textarea id="mre_bail" placeholder="ex: clause de renonciation à recours..." style="min-height:50px;"></textarea></div>
+      </div>
+      <div style="margin-top:8px;"><label>Si occupant partiel, activités des autres occupants</label><input type="text" id="mre_autres_occ" placeholder="Activités des autres occupants"/></div>
+      <div class="subsection-title">Description du bâtiment</div>
+      <div class="form-row two">
+        <div><label>Année de construction</label><input type="number" id="mre_annee_const" placeholder="ex: 1998"/></div>
+        <div>
+          <div class="field-label-inline">Bâtiment classé monuments historiques ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_classe" value="oui"/> Oui</label><label><input type="radio" name="mre_classe" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div><label>Ossature</label>
+          <select id="mre_ossature">
+            <option value="">Sélectionner</option>
+            <option>1 – Maçonnerie</option>
+            <option>2 – Acier protégé ou bois lamellé collé</option>
+            <option>3 – Acier non protégé ou bois massif</option>
+            <option>4 – Panneaux sandwich autoporteurs</option>
+          </select>
+        </div>
+        <div><label>Murs extérieurs</label>
+          <select id="mre_murs">
+            <option value="">Sélectionner</option>
+            <option>1 – Maçonnerie / pierres / parpaings</option>
+            <option>2 – Bac acier (double peau isolant minéral)</option>
+            <option>3 – PVC / bac acier avec isolant combustible / bois</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div><label>Nature des planchers</label>
+          <select id="mre_planchers">
+            <option value="">Sélectionner</option>
+            <option>0 – Simple RDC</option>
+            <option>1 – Plancher béton sur solive béton</option>
+            <option>2 – Plancher béton sur solive bois protégé ou acier protégé</option>
+            <option>3 – Plancher (autre que bois) sur solive acier non protégé</option>
+            <option>4 – Plancher bois sur tout type de solives</option>
+          </select>
+        </div>
+        <div><label>Nombre de niveaux</label>
+          <select id="mre_niveaux">
+            <option value="">Sélectionner</option>
+            <option>A – Simple RDC</option>
+            <option>B – 2 à 5 niveaux (plancher haut ≤ 28m)</option>
+            <option>C – Plus de 5 niveaux ou plancher haut &gt; 28m</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div><label>Couverture</label>
+          <select id="mre_couv">
+            <option value="">Sélectionner</option>
+            <option>1 – Béton/acier/fibrociment/ardoises/tuiles (support incombustible)</option>
+            <option>2 – Béton avec isolant mousse / acier avec étanchéité</option>
+            <option>3 – Ardoises ou tuiles sur support combustible</option>
+            <option>4 – Acier avec isolant combustible / bois / matières plastiques</option>
+          </select>
+        </div>
+        <div><label>Aménagements intérieurs</label>
+          <select id="mre_amenag">
+            <option value="">Sélectionner</option>
+            <option>1 – Aménagements incombustibles</option>
+            <option>2 – Aménagements combustibles</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Présence de chambres froides ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_froid" value="oui"/> Oui</label><label><input type="radio" name="mre_froid" value="non"/> Non</label></div>
+          <label>Volume total (m³)</label><input type="number" id="mre_froid_vol" placeholder="m³"/>
+        </div>
+        <div>
+          <div class="field-label-inline">Compartimentage ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_compart" value="oui"/> Oui</label><label><input type="radio" name="mre_compart" value="non"/> Non</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6 : Équipements techniques -->
+  <div class="form-card">
+    <div class="section-header orange">⚙️ 6. Équipements et installations techniques</div>
+    <div class="section-body">
+      <div class="form-row two">
+        <div><label>Valeur totale du parc machines (€)</label><input type="number" id="mre_val_machines" placeholder="€"/></div>
+        <div>
+          <div class="field-label-inline">Machine contrôlant plus de 50% de la production ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_machine50" value="oui"/> Oui</label><label><input type="radio" name="mre_machine50" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div><label>Valeur de la machine la plus chère (€)</label><input type="number" id="mre_val_machine_max" placeholder="€"/></div>
+        <div><label>Usage de cette machine</label><input type="text" id="mre_machine_usage" placeholder="Description de l'usage"/></div>
+      </div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Machines fonctionnant après fermeture ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_mach_nuit" value="oui"/> Oui</label><label><input type="radio" name="mre_mach_nuit" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Machines sous contrat de maintenance ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_mach_maint" value="oui"/> Oui</label><label><input type="radio" name="mre_mach_maint" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Chargeurs de batteries ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_charg" value="oui"/> Oui</label><label><input type="radio" name="mre_charg" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Luminaires capotés ou LED ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_led" value="oui"/> Oui</label><label><input type="radio" name="mre_led" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div style="margin-top:8px;"><label>Risques spéciaux (matériel chauffant, huiles, poussières, produits dangereux...)</label><textarea id="mre_risques_spec" placeholder="Décrire les process, systèmes et leurs situations..."></textarea></div>
+      <div class="subsection-title">Chauffage des locaux</div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Locaux chauffés ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_chauf" value="oui"/> Oui</label><label><input type="radio" name="mre_chauf" value="non"/> Non</label></div>
+          <label style="margin-top:6px;">Mode de chauffage</label>
+          <select id="mre_chauf_type">
+            <option value="">Sélectionner</option>
+            <option>Centralisé</option><option>Décentralisé – radiateurs</option>
+            <option>Décentralisé – panneaux radiants</option><option>Décentralisé – convecteurs</option>
+            <option>Décentralisé – aérothermes</option><option>Climatisation réversible</option><option>Autre</option>
+          </select>
+        </div>
+        <div>
+          <label>Situation de la chaudière</label>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_chaud" value="Pas de chaudière"/> Pas de chaudière</label>
+            <label><input type="radio" name="mre_chaud" value="En atelier"/> En atelier</label>
+            <label><input type="radio" name="mre_chaud" value="Local spécial"/> En local spécial</label>
+          </div>
+          <div style="margin-top:6px;">
+            <div class="field-label-inline">Local spécial coupe-feu ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_chaud_cf" value="oui"/> Oui</label><label><input type="radio" name="mre_chaud_cf" value="non"/> Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="subsection-title">Informatique</div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Serveur(s) informatique(s) ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_srv" value="oui"/> Oui</label><label><input type="radio" name="mre_srv" value="non"/> Non</label></div>
+          <div class="checkbox-group" style="margin-top:4px;">
+            <label><input type="checkbox" id="mre_srv_int"/> Interne – local coupe-feu</label>
+            <label><input type="checkbox" id="mre_srv_ext"/> Externe – hébergeur</label>
+          </div>
+        </div>
+        <div>
+          <div class="field-label-inline">Sauvegarde informatique ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_sauv" value="oui"/> Oui</label><label><input type="radio" name="mre_sauv" value="non"/> Non</label></div>
+          <div class="radio-group" style="margin-top:4px;">
+            <label><input type="radio" name="mre_sauv_freq" value="Quotidienne"/> Quotidienne</label>
+            <label><input type="radio" name="mre_sauv_freq" value="Hebdomadaire"/> Hebdomadaire</label>
+            <label><input type="radio" name="mre_sauv_freq" value="Mensuelle"/> Mensuelle</label>
+          </div>
+          <div style="margin-top:4px;">
+            <div class="field-label-inline">Sauvegarde externalisée ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_sauv_ext" value="oui"/> Oui</label><label><input type="radio" name="mre_sauv_ext" value="non"/> Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="subsection-title">Panneaux photovoltaïques</div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Présence de panneaux photovoltaïques ?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_ppv" value="oui" onclick="document.getElementById('mre_ppv_details').classList.add('visible')"/> Oui</label>
+            <label><input type="radio" name="mre_ppv" value="non" onclick="document.getElementById('mre_ppv_details').classList.remove('visible')"/> Non</label>
+          </div>
+        </div>
+      </div>
+      <div id="mre_ppv_details" class="conditionnel" style="background:var(--caa-orange-clair);padding:12px;border-radius:6px;margin-top:6px;">
+        <div class="form-row three">
+          <div><label>Superficie (m²)</label><input type="number" id="mre_ppv_surf" placeholder="m²"/></div>
+          <div><label>Date d'installation</label><input type="date" id="mre_ppv_date"/></div>
+          <div><label>Contrat de maintenance ?</label>
+            <div class="radio-group"><label><input type="radio" name="mre_ppv_maint" value="oui"/> Oui</label><label><input type="radio" name="mre_ppv_maint" value="non"/> Non</label></div>
+          </div>
+        </div>
+        <div class="form-row two">
+          <div>
+            <div class="field-label-inline">Toiture avec isolant thermique combustible ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_ppv_isol" value="oui"/> Oui</label><label><input type="radio" name="mre_ppv_isol" value="non"/> Non</label></div>
+          </div>
+          <div>
+            <div class="field-label-inline">Production destinée à :</div>
+            <div class="radio-group">
+              <label><input type="radio" name="mre_ppv_dest" value="Autoconsommation"/> Autoconsommation</label>
+              <label><input type="radio" name="mre_ppv_dest" value="Revente"/> Revente</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-row two">
+          <div>
+            <div class="field-label-inline">Étude de résistance de structure effectuée ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_ppv_etude" value="oui"/> Oui</label><label><input type="radio" name="mre_ppv_etude" value="non"/> Non</label></div>
+          </div>
+          <div>
+            <div class="field-label-inline">Système de monitoring reporté ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_ppv_monit" value="oui"/> Oui</label><label><input type="radio" name="mre_ppv_monit" value="non"/> Non</label></div>
+          </div>
+        </div>
+        <div class="form-row two">
+          <div>
+            <div class="field-label-inline">Parafoudres en amont/aval de l'onduleur ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_ppv_para" value="oui"/> Oui</label><label><input type="radio" name="mre_ppv_para" value="non"/> Non</label></div>
+          </div>
+          <div>
+            <div class="field-label-inline">Détecteurs d'arcs électriques ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_ppv_arcs" value="oui"/> Oui</label><label><input type="radio" name="mre_ppv_arcs" value="non"/> Non</label></div>
+          </div>
+        </div>
+        <div class="form-row two">
+          <div>
+            <div class="field-label-inline">Contrôle électrique annuel des installations PV ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_ppv_ctrl" value="oui"/> Oui</label><label><input type="radio" name="mre_ppv_ctrl" value="non"/> Non</label></div>
+          </div>
+          <div>
+            <div class="field-label-inline">Contrôle thermographie infrarouge prévu ?</div>
+            <div class="radio-group"><label><input type="radio" name="mre_ppv_thermo" value="oui"/> Oui</label><label><input type="radio" name="mre_ppv_thermo" value="non"/> Non</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7 : Prévention incendie -->
+  <div class="form-card">
+    <div class="section-header orange">🔥 7. Moyens de prévention incendie</div>
+    <div class="section-body">
+      <table class="garanties-table" style="font-size:0.83rem;">
+        <thead><tr><th>Équipement</th><th>Présence</th><th>Vérif. annuelle</th><th>Date certificat</th><th>Anomalies corrigées</th></tr></thead>
+        <tbody>
+          <tr><td>Électricité (Q18)</td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_elec_p" value="oui"/>Oui</label><label><input type="radio" name="mre_elec_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_elec_v" value="oui"/>Oui</label><label><input type="radio" name="mre_elec_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_elec_a" value="oui"/>Oui</label><label><input type="radio" name="mre_elec_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Thermographie (Q19)</td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_thermo_p" value="oui"/>Oui</label><label><input type="radio" name="mre_thermo_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_thermo_v" value="oui"/>Oui</label><label><input type="radio" name="mre_thermo_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_thermo_a" value="oui"/>Oui</label><label><input type="radio" name="mre_thermo_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Extincteurs (Q4)</td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_ext_p" value="oui"/>Oui</label><label><input type="radio" name="mre_ext_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_ext_v" value="oui"/>Oui</label><label><input type="radio" name="mre_ext_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_ext_a" value="oui"/>Oui</label><label><input type="radio" name="mre_ext_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>RIA – Robinets incendie armés (Q5)</td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_ria_p" value="oui"/>Oui</label><label><input type="radio" name="mre_ria_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_ria_v" value="oui"/>Oui</label><label><input type="radio" name="mre_ria_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_ria_a" value="oui"/>Oui</label><label><input type="radio" name="mre_ria_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Exutoires de fumées (Q17)</td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_fum_p" value="oui"/>Oui</label><label><input type="radio" name="mre_fum_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_fum_v" value="oui"/>Oui</label><label><input type="radio" name="mre_fum_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_fum_a" value="oui"/>Oui</label><label><input type="radio" name="mre_fum_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Détection automatique incendie (Q7)</td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_dai_p" value="oui"/>Oui</label><label><input type="radio" name="mre_dai_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_dai_v" value="oui"/>Oui</label><label><input type="radio" name="mre_dai_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_dai_a" value="oui"/>Oui</label><label><input type="radio" name="mre_dai_a" value="non"/>Non</label></div></td>
+          </tr>
+          <tr><td>Extinction automatique – sprinklers (Q1)</td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_sprk_p" value="oui"/>Oui</label><label><input type="radio" name="mre_sprk_p" value="non"/>Non</label></div></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_sprk_v" value="oui"/>Oui</label><label><input type="radio" name="mre_sprk_v" value="non"/>Non</label></div></td>
+            <td><input type="date" style="width:130px"/></td>
+            <td><div class="radio-group"><label><input type="radio" name="mre_sprk_a" value="oui"/>Oui</label><label><input type="radio" name="mre_sprk_a" value="non"/>Non</label></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;">
+        <div class="field-label-inline">Personnel formé aux moyens de protection incendie ?</div>
+        <div class="radio-group"><label><input type="radio" name="mre_form_inc" value="oui"/> Oui</label><label><input type="radio" name="mre_form_inc" value="non"/> Non</label></div>
+        <div class="form-row two" style="margin-top:8px;">
+          <div><label>Nombre d'équipiers formés</label><input type="number" id="mre_nb_equip" placeholder="nb"/></div>
+          <div><label>Date dernière formation</label><input type="date" id="mre_date_form"/></div>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:10px;">
+        <div>
+          <div class="field-label-inline">Consignes de sécurité affichées ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_consignes" value="oui"/> Oui</label><label><input type="radio" name="mre_consignes" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Permis de FEU connu et appliqué ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_permis_feu" value="oui"/> Oui</label><label><input type="radio" name="mre_permis_feu" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div class="subsection-title">Moyens externes de protection incendie</div>
+      <div class="form-row two">
+        <div><label>Centre de secours le plus proche</label><input type="text" id="mre_centre_sec" placeholder="Localisation"/></div>
+        <div><label>Catégorie du centre</label>
+          <div class="radio-group">
+            <label><input type="radio" name="mre_cat_sec" value="Principal"/> Centre principal</label>
+            <label><input type="radio" name="mre_cat_sec" value="Secondaire"/> Centre secondaire</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Bornes incendie / réserve d'eau ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_bornes" value="oui"/> Oui</label><label><input type="radio" name="mre_bornes" value="non"/> Non</label></div>
+          <label>Distance du bâtiment (m)</label><input type="number" id="mre_bornes_dist" placeholder="m"/>
+        </div>
+        <div><label>Ressources en eau supplémentaires</label><input type="text" id="mre_eau_supp" placeholder="bâche, bassin..."/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8 : Protection vol -->
+  <div class="form-card">
+    <div class="section-header canard">🔒 8. Moyens de protection vol / intrusion</div>
+    <div class="section-body">
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Site entièrement clôturé ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_cloture" value="oui"/> Oui</label><label><input type="radio" name="mre_cloture" value="non"/> Non</label></div>
+          <label>Précisez (hauteur, type)</label><input type="text" id="mre_cloture_det" placeholder="ex: grillage 2m + portail coulissant"/>
+        </div>
+        <div>
+          <div class="field-label-inline">Gardiennage pendant les heures de fermeture ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_garden" value="oui"/> Oui</label><label><input type="radio" name="mre_garden" value="non"/> Non</label></div>
+          <label>Précisez</label><input type="text" id="mre_garden_det" placeholder="Société, horaires..."/>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:10px;">
+        <div>
+          <div class="field-label-inline">Protection mécanique ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_prot_meca" value="oui"/> Oui</label><label><input type="radio" name="mre_prot_meca" value="non"/> Non</label></div>
+          <label>Précisez</label><input type="text" id="mre_prot_meca_det" placeholder="Portes blindées, coffres..."/>
+        </div>
+        <div>
+          <div class="field-label-inline">Protection électronique ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_prot_elec" value="oui"/> Oui</label><label><input type="radio" name="mre_prot_elec" value="non"/> Non</label></div>
+          <div class="checkbox-group" style="margin-top:6px;">
+            <label><input type="checkbox" id="mre_vol_vol"/> Volumétrique</label>
+            <label><input type="checkbox" id="mre_vol_peri"/> Périmétrique</label>
+            <label><input type="checkbox" id="mre_vol_periph"/> Périphérique</label>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="field-label-inline">Report d'alarme ?</div>
+        <div class="radio-group"><label><input type="radio" name="mre_report" value="oui"/> Oui</label><label><input type="radio" name="mre_report" value="non"/> Non</label></div>
+        <div class="checkbox-group" style="margin-top:6px;">
+          <label><input type="checkbox" id="mre_rep_dir"/> Vers dirigeant</label>
+          <label><input type="checkbox" id="mre_rep_tele"/> Vers société de télésurveillance</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 9 : Tenue du risque -->
+  <div class="form-card">
+    <div class="section-header prairie">📊 9. Tenue du risque</div>
+    <div class="section-body">
+      <div class="form-row two">
+        <div>
+          <div class="field-label-inline">Bâtiment encombré ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_encombr" value="oui"/> Oui</label><label><input type="radio" name="mre_encombr" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Allées de circulation libres et accès équipements dégagés ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_allees" value="oui"/> Oui</label><label><input type="radio" name="mre_allees" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:8px;">
+        <div>
+          <div class="field-label-inline">Abords du bâtiment dégagés ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_abords" value="oui"/> Oui</label><label><input type="radio" name="mre_abords" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Stockage extérieur matières combustibles à + de 10m du bâtiment ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_stock_ext" value="oui"/> Oui</label><label><input type="radio" name="mre_stock_ext" value="non"/> Non</label></div>
+          <label>Nature</label><input type="text" id="mre_stock_ext_det" placeholder="Palettes, marchandises, déchets..."/>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:8px;">
+        <div>
+          <div class="field-label-inline">Locaux techniques présents (transformateurs, chaufferie...) ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_loc_tech" value="oui"/> Oui</label><label><input type="radio" name="mre_loc_tech" value="non"/> Non</label></div>
+          <div class="field-label-inline" style="margin-top:4px;">Libres de tout stockage ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_loc_tech_lib" value="oui"/> Oui</label><label><input type="radio" name="mre_loc_tech_lib" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Nettoyage des locaux ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_nettoyage" value="oui"/> Oui</label><label><input type="radio" name="mre_nettoyage" value="non"/> Non</label></div>
+          <div class="field-label-inline" style="margin-top:4px;">Locaux empoussiérés ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_pouss" value="oui"/> Oui</label><label><input type="radio" name="mre_pouss" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div class="form-row two" style="margin-top:8px;">
+        <div>
+          <div class="field-label-inline">Bennes capotées ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_bennes" value="oui"/> Oui</label><label><input type="radio" name="mre_bennes" value="non"/> Non</label></div>
+        </div>
+        <div>
+          <div class="field-label-inline">Entreprise sensibilisée à la sécurité et à la prévention ?</div>
+          <div class="radio-group"><label><input type="radio" name="mre_sensib" value="oui"/> Oui</label><label><input type="radio" name="mre_sensib" value="non"/> Non</label></div>
+        </div>
+      </div>
+      <div style="margin-top:8px;"><label>Notes (retour d'expérience, investissements prévention, projets...)</label><textarea id="mre_notes_risque" placeholder="Notes..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Section 10 : Garanties et capitaux -->
+  <div class="form-card">
+    <div class="section-header">💰 10. Garanties, capitaux et franchises</div>
+    <div class="section-body">
+      <div class="subsection-title">Dommages aux biens</div>
+      <table class="garanties-table">
+        <thead><tr><th>Garantie</th><th>À souscrire</th><th>Capitaux (€)</th><th>Franchise</th></tr></thead>
+        <tbody>
+          <tr><td>Incendie et risques annexes + Cat nat + Attentats <span class="info-badge">OBLIGATOIRE</span></td><td>–</td><td><input type="text" placeholder="Bâtiment / Matériels / Marchands"/></td><td><input type="text"/></td></tr>
+          <tr><td>Vol / Vandalisme</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_vol" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_vol" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Dégâts des eaux / Gel / Refoulement</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_dde" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_dde" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Bris de glaces</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_bdg" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_bdg" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Dommages électriques / TRI</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_elec" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_elec" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Pertes marchandises transportées</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_tpt" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_tpt" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Bris de machines</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_bm" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_bm" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Pertes liquides et marchandises périssables</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_liq" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_liq" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+        </tbody>
+      </table>
+      <div class="subsection-title">Protection financière</div>
+      <table class="garanties-table">
+        <thead><tr><th>Garantie</th><th>À souscrire</th><th>Montant / Marge brute (€)</th><th>Franchise / Période</th></tr></thead>
+        <tbody>
+          <tr><td>Perte d'exploitation</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_pe" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_pe" value="non"/>Non</label></div></td><td><input type="text" placeholder="Marge brute annuelle"/></td><td><input type="text" placeholder="Période d'indemnisation"/></td></tr>
+          <tr><td>Frais supplémentaires d'exploitation</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_fs" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_fs" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Perte de valeur vénale du fonds de commerce</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_pvvfc" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_pvvfc" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+          <tr><td>Carence fournisseurs-clés / clients-clés / impossibilité d'accès</td><td><div class="radio-group"><label><input type="radio" name="mre_gar_carence" value="oui"/>Oui</label><label><input type="radio" name="mre_gar_carence" value="non"/>Non</label></div></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;"><label>Autres garanties / informations complémentaires</label><textarea id="mre_autres_gar" placeholder="Adresse site internet, photos, autres infos..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="actions-bar">
+    <button class="btn-download" onclick="downloadPDF('mre')">⬇️ Télécharger en PDF</button>
+    <button class="btn-reset" onclick="resetForm('mre')">🗑️ Réinitialiser</button>
+  </div>
+</div>
+
+<script>
+  function showTab(tab) {
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  function toggleCond(id) {
+    document.getElementById(id).classList.add('visible');
+  }
+  function hideCond(id) {
+    document.getElementById(id).classList.remove('visible');
+  }
+
+  function resetForm(formId) {
+    if (!confirm('Réinitialiser tous les champs du formulaire ?')) return;
+    const panel = document.getElementById('tab-' + formId);
+    panel.querySelectorAll('input[type=text], input[type=number], input[type=date], input[type=email], select, textarea').forEach(el => { el.value = ''; });
+    panel.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(el => { el.checked = false; });
+    panel.querySelectorAll('.conditionnel').forEach(el => el.classList.remove('visible'));
+  }
+
+  function getVal(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+  function getRadio(name) {
+    const el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : '–';
+  }
+  function getChecked(name) {
+    const checked = [];
+    document.querySelectorAll('input[name="' + name + '"]:checked').forEach(el => checked.push(el.value));
+    return checked.length ? checked.join(', ') : '–';
+  }
+
+  function downloadPDF(formId) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = 210, margin = 15, maxW = pageW - margin * 2;
+    let y = 0;
+
+    const colors = {
+      headerBg: [0, 106, 78],
+      sectionBg: [217, 233, 228],
+      rowBg: [243, 250, 247],
+      label: [0, 106, 78],
+      value: [74, 74, 73],
+      white: [255, 255, 255],
+      light: [240, 240, 240]
+    };
+
+    function checkPage(needed) {
+      if (y + needed > 277) { doc.addPage(); y = 18; }
+    }
+
+    function drawHeader() {
+      doc.setFillColor(...colors.headerBg);
+      doc.rect(0, 0, 210, 22, 'F');
+      doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      const titles = { agri: '🌾 Concessions Agricoles', flotte: '🚗 Flotte', mre: '🏢 MRE – Risque Entreprise' };
+      doc.text('Crédit Agricole Assurances – ' + (titles[formId] || formId), margin, 10);
+      doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+      doc.text('Document confidentiel – Usage interne | Généré le ' + new Date().toLocaleDateString('fr-FR'), margin, 17);
+      y = 28;
+    }
+
+    function drawSection(title) {
+      checkPage(12);
+      doc.setFillColor(...colors.sectionBg);
+      doc.rect(margin, y, maxW, 8, 'F');
+      doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colors.headerBg);
+      doc.text(title, margin + 3, y + 5.5);
+      y += 11;
+    }
+
+    function drawField(label, value) {
+      if (!value || value === '–' || value === '') return;
+      checkPage(8);
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colors.label);
+      doc.text(label + ' :', margin + 2, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.value);
+      const lines = doc.splitTextToSize(String(value), maxW - 60);
+      doc.text(lines, margin + 60, y);
+      y += Math.max(6, lines.length * 5);
+    }
+
+    function drawSubSection(title) {
+      checkPage(8);
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colors.label);
+      doc.setFillColor(237, 245, 222);
+      doc.rect(margin, y - 1, maxW, 7, 'F');
+      doc.text('▸ ' + title, margin + 2, y + 4);
+      y += 9;
+    }
+
+    drawHeader();
+
+    if (formId === 'agri') {
+      drawSection('1. Informations générales');
+      drawField('Caisse régionale', getVal('agri_cr'));
+      drawField('C2AE', getVal('agri_c2ae'));
+      drawField('Visite réalisée par', getRadio('agri_visite'));
+      drawField('Date rendez-vous', getVal('agri_date_rdv'));
+      drawField('Raison sociale', getVal('agri_rs'));
+      drawField('N° SIRET', getVal('agri_siret'));
+      drawField('Note BALE II', getVal('agri_bale'));
+      drawField('N° devis Casiris', getVal('agri_casiris'));
+      drawField('Date d\'effet souhaitée', getVal('agri_effet'));
+      drawField('Adresse', getVal('agri_adresse'));
+      drawField('Assureur tenant', getVal('agri_assureur'));
+      drawField('Date d\'échéance', getVal('agri_echeance'));
+      drawField('Budget actuel TTC', getVal('agri_budget') ? getVal('agri_budget') + ' €' : '');
+      drawField('Fractionnement', getVal('agri_fract'));
+
+      drawSection('2. Antécédents d\'assurance');
+      drawField('Contrat résilié', getRadio('agri_resil'));
+      drawField('Motif résiliation', getVal('agri_motif_resil'));
+      drawField('Nb sinistres (36 mois)', getVal('agri_nb_sinistres'));
+
+      drawSection('3. Activités et chiffre d\'affaires');
+      drawField('CA annuel HT N-1', getVal('agri_ca_n1') ? getVal('agri_ca_n1') + ' €' : '');
+      drawField('CA annuel HT N-2', getVal('agri_ca_n2') ? getVal('agri_ca_n2') + ' €' : '');
+      drawField('Activité saisonnière', getRadio('agri_sais'));
+      drawField('Effectif total', getVal('agri_effectif'));
+      drawField('Dont intérimaires/CDD', getVal('agri_interim'));
+      drawField('Masse salariale brute', getVal('agri_masse_sal') ? getVal('agri_masse_sal') + ' €' : '');
+      drawField('Détail activité', getVal('agri_detail_act'));
+
+      drawSection('4. Responsabilités particulières');
+      drawField('ICPE', getRadio('agri_icpe'));
+      drawField('Classification ICPE', getVal('agri_icpe_class'));
+      drawField('ERP', getRadio('agri_erp'));
+      drawField('Catégorie ERP', getVal('agri_erp_cat'));
+      drawField('Substances PFAS', getRadio('agri_pfas'));
+
+      drawSection('5. Description du bâtiment');
+      drawField('Adresse site', getVal('agri_site_adresse'));
+      drawField('Surface occupée', getVal('agri_surf_occ') ? getVal('agri_surf_occ') + ' m²' : '');
+      drawField('Surface totale', getVal('agri_surf_tot') ? getVal('agri_surf_tot') + ' m²' : '');
+      drawField('Qualité occupant', getRadio('agri_occup'));
+      drawField('Année construction', getVal('agri_annee_const'));
+      drawField('Ossature', getVal('agri_ossature'));
+      drawField('Murs extérieurs', getVal('agri_murs'));
+      drawField('Couverture', getVal('agri_couv'));
+      drawField('Nombre de niveaux', getVal('agri_niveaux'));
+      drawField('Panneaux photovoltaïques', getRadio('agri_ppv'));
+      drawField('IRVE', getRadio('agri_irve'));
+      drawField('Chauffage', getVal('agri_chauffage'));
+      drawField('Compartimentage', getRadio('agri_compart'));
+
+      drawSection('6. Prévention incendie');
+      drawField('Personnel formé incendie', getRadio('agri_form_inc'));
+      drawField('Nb équipiers formés', getVal('agri_nb_equip'));
+      drawField('Date dernière formation', getVal('agri_date_form'));
+      drawField('Permis de FEU', getRadio('agri_permis_feu'));
+
+      drawSection('7. Protection vol / intrusion');
+      drawField('Site clôturé', getRadio('agri_cloture'));
+      drawField('Détail clôture', getVal('agri_cloture_detail'));
+      drawField('Gardiennage', getRadio('agri_garden'));
+      drawField('Protection mécanique', getRadio('agri_prot_meca'));
+      drawField('Protection électronique', getRadio('agri_prot_elec'));
+      drawField('Report alarme', getRadio('agri_report'));
+
+      drawSection('9. Parc automobile');
+      drawField('Notes', getVal('agri_notes'));
+
+    } else if (formId === 'flotte') {
+      drawSection('1. Informations générales');
+      drawField('Caisse régionale', getVal('fl_cr'));
+      drawField('N° devis Casiris', getVal('fl_casiris'));
+      drawField('Raison sociale', getVal('fl_rs'));
+      drawField('N° SIRET', getVal('fl_siret'));
+      drawField('Secteur d\'activité', getVal('fl_secteur'));
+      drawField('Note BALE II', getVal('fl_bale'));
+      drawField('Assureur tenant', getVal('fl_assureur'));
+      drawField('Budget actuel TTC', getVal('fl_budget') ? getVal('fl_budget') + ' €' : '');
+      drawField('Date d\'échéance', getVal('fl_echeance'));
+      drawField('Date d\'effet souhaitée', getVal('fl_effet'));
+
+      drawSection('2. Antécédents');
+      drawField('Contrat résilié', getRadio('fl_resil'));
+      drawField('Nb sinistres (36 mois)', getVal('fl_nb_sin'));
+
+      drawSection('3. Composition de la flotte');
+      drawField('Usage géographique', getRadio('fl_geo'));
+
+      drawSection('4. Garanties souhaitées');
+      drawField('RC (obligatoire)', 'Oui');
+      drawField('Tous risques collision', getRadio('fl_trc'));
+      drawField('Bris de glace', getRadio('fl_bdg'));
+      drawField('Vol / Incendie', getRadio('fl_vi'));
+      drawField('Protection conducteur', getRadio('fl_pdc'));
+      drawField('Assistance / Remorquage', getRadio('fl_assist'));
+      drawField('Marchandises transportées', getRadio('fl_march'));
+      drawField('Notes', getVal('fl_notes'));
+
+    } else if (formId === 'mre') {
+      drawSection('1. Informations générales');
+      drawField('Nom du dossier', getVal('mre_dossier'));
+      drawField('N° devis Casiris', getVal('mre_casiris'));
+      drawField('Caisse régionale', getVal('mre_cr'));
+      drawField('Date rendez-vous', getVal('mre_date_rdv'));
+      drawField('Visite réalisée par', getRadio('mre_visite'));
+      drawField('Raison sociale', getVal('mre_rs'));
+      drawField('Représentant légal', getVal('mre_repr'));
+      drawField('Forme juridique', getVal('mre_forme'));
+      drawField('Date de création', getVal('mre_creation'));
+      drawField('N° SIRET', getVal('mre_siret'));
+      drawField('Adresse siège social', getVal('mre_adresse'));
+      drawField('Code postal / Commune', getVal('mre_cp') + ' ' + getVal('mre_commune'));
+      drawField('Code NAF', getVal('mre_naf'));
+      drawField('Note BALE II', getVal('mre_bale'));
+      drawField('Assureur tenant', getVal('mre_assureur'));
+      drawField('Date d\'échéance', getVal('mre_echeance'));
+      drawField('Budget actuel TTC', getVal('mre_budget') ? getVal('mre_budget') + ' €' : '');
+      drawField('Date d\'effet souhaitée', getVal('mre_effet'));
+      drawField('Fractionnement', getVal('mre_fract'));
+      drawField('Contexte commercial', getVal('mre_contexte'));
+
+      drawSection('2. Déclarations et antécédents');
+      drawField('Contrat résilié', getRadio('mre_resil'));
+      drawField('Motif résiliation', getVal('mre_motif_resil'));
+      drawField('Nb sinistres (36 mois)', getVal('mre_nb_sin'));
+      drawField('Sanction Code du travail', getRadio('mre_sanction'));
+      drawField('Notes', getVal('mre_notes_decl'));
+
+      drawSection('3. RC Générale – Activités');
+      drawField('CA annuel HT N-1', getVal('mre_ca_n1') ? getVal('mre_ca_n1') + ' €' : '');
+      drawField('CA annuel HT N-2', getVal('mre_ca_n2') ? getVal('mre_ca_n2') + ' €' : '');
+      drawField('Activité saisonnière', getRadio('mre_sais'));
+      drawField('Détail activité', getVal('mre_detail_act'));
+      drawField('Effectif total', getVal('mre_effectif'));
+      drawField('Dont intérimaires/CDD', getVal('mre_interim'));
+      drawField('Masse salariale brute', getVal('mre_masse_sal') ? getVal('mre_masse_sal') + ' €' : '');
+      drawField('DUERP', getRadio('mre_duerp'));
+      drawField('Équipes présentes', getRadio('mre_equipe'));
+      drawField('Fournisseurs principaux', getVal('mre_fournisseurs'));
+      drawField('Clients principaux', getVal('mre_clients'));
+      drawField('Démarche qualité', getRadio('mre_qualite'));
+      drawField('Certifications/agréments', getVal('mre_cert_det'));
+      drawField('ICPE', getRadio('mre_icpe'));
+      drawField('Classification ICPE', getVal('mre_icpe_class'));
+      drawField('ERP', getRadio('mre_erp'));
+      drawField('Catégorie ERP', getVal('mre_erp_cat'));
+      drawField('PFAS', getRadio('mre_pfas'));
+      drawField('Démarche RSE', getRadio('mre_rse'));
+      drawField('Actions RSE', getVal('mre_rse_detail'));
+
+      drawSection('4. Responsabilité civile');
+      drawField('RC Exploitation (oblig.)', 'Oui');
+      drawField('RC Après livraison', getRadio('mre_rcal'));
+      drawField('RC Professionnelle', getRadio('mre_rcp'));
+      drawField('Notes RC', getVal('mre_rc_notes'));
+
+      drawSection('5. Site et bâtiment');
+      drawField('Adresse site', getVal('mre_site_adresse'));
+      drawField('Intitulé CASIRIS', getVal('mre_site_casiris'));
+      drawField('Implantation', getRadio('mre_impl'));
+      drawField('Inondation 10 ans', getRadio('mre_inond'));
+      drawField('Activités voisines', getVal('mre_voisins'));
+      drawField('Surface occupée', getVal('mre_surf_occ') ? getVal('mre_surf_occ') + ' m²' : '');
+      drawField('Surface totale', getVal('mre_surf_tot') ? getVal('mre_surf_tot') + ' m²' : '');
+      drawField('Qualité occupant', getRadio('mre_proprio'));
+      drawField('Assurance pour compte', getRadio('mre_apc'));
+      drawField('Nom propriétaire', getVal('mre_nom_proprio'));
+      drawField('Renonciation à recours', getRadio('mre_renonc'));
+      drawField('Dispositions bail', getVal('mre_bail'));
+      drawField('Année construction', getVal('mre_annee_const'));
+      drawField('Ossature', getVal('mre_ossature'));
+      drawField('Murs extérieurs', getVal('mre_murs'));
+      drawField('Nature des planchers', getVal('mre_planchers'));
+      drawField('Nombre de niveaux', getVal('mre_niveaux'));
+      drawField('Couverture', getVal('mre_couv'));
+      drawField('Aménagements', getVal('mre_amenag'));
+      drawField('Chambres froides', getRadio('mre_froid'));
+      drawField('Compartimentage', getRadio('mre_compart'));
+
+      drawSection('6. Équipements techniques');
+      drawField('Valeur parc machines', getVal('mre_val_machines') ? getVal('mre_val_machines') + ' €' : '');
+      drawField('Machine > 50% production', getRadio('mre_machine50'));
+      drawField('Valeur machine la + chère', getVal('mre_val_machine_max') ? getVal('mre_val_machine_max') + ' €' : '');
+      drawField('Chauffage', getVal('mre_chauf_type'));
+      drawField('Serveurs informatiques', getRadio('mre_srv'));
+      drawField('Sauvegarde informatique', getRadio('mre_sauv'));
+      drawField('Fréquence sauvegarde', getRadio('mre_sauv_freq'));
+      drawField('PPV', getRadio('mre_ppv'));
+      drawField('Risques spéciaux', getVal('mre_risques_spec'));
+
+      drawSection('7. Prévention incendie');
+      drawField('Personnel formé incendie', getRadio('mre_form_inc'));
+      drawField('Nb équipiers formés', getVal('mre_nb_equip'));
+      drawField('Date dernière formation', getVal('mre_date_form'));
+      drawField('Permis de FEU', getRadio('mre_permis_feu'));
+      drawField('Centre de secours', getVal('mre_centre_sec'));
+      drawField('Bornes incendie', getRadio('mre_bornes'));
+
+      drawSection('8. Protection vol / intrusion');
+      drawField('Site clôturé', getRadio('mre_cloture'));
+      drawField('Détail clôture', getVal('mre_cloture_det'));
+      drawField('Gardiennage', getRadio('mre_garden'));
+      drawField('Protection mécanique', getRadio('mre_prot_meca'));
+      drawField('Protection électronique', getRadio('mre_prot_elec'));
+      drawField('Report alarme', getRadio('mre_report'));
+
+      drawSection('9. Tenue du risque');
+      drawField('Bâtiment encombré', getRadio('mre_encombr'));
+      drawField('Allées libres', getRadio('mre_allees'));
+      drawField('Abords dégagés', getRadio('mre_abords'));
+      drawField('Nettoyage locaux', getRadio('mre_nettoyage'));
+      drawField('Sensibilité prévention', getRadio('mre_sensib'));
+      drawField('Notes', getVal('mre_notes_risque'));
+
+      drawSection('10. Garanties et capitaux');
+      drawField('Vol/Vandalisme', getRadio('mre_gar_vol'));
+      drawField('Dégâts des eaux', getRadio('mre_gar_dde'));
+      drawField('Bris de glaces', getRadio('mre_gar_bdg'));
+      drawField('Dommages électriques', getRadio('mre_gar_elec'));
+      drawField('Bris de machines', getRadio('mre_gar_bm'));
+      drawField('Perte d\'exploitation', getRadio('mre_gar_pe'));
+      drawField('Frais supplémentaires', getRadio('mre_gar_fs'));
+      drawField('Carence fournisseurs', getRadio('mre_gar_carence'));
+      drawField('Autres informations', getVal('mre_autres_gar'));
+    }
+
+    // Pied de page sur toutes les pages
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFillColor(0, 106, 78);
+      doc.rect(0, 287, 210, 10, 'F');
+      doc.setFontSize(7); doc.setFont('helvetica', 'italic');
+      doc.setTextColor(255, 255, 255);
+      doc.text('CONFIDENTIEL – Crédit Agricole Assurances – Usage interne uniquement', margin, 293);
+      doc.text('Page ' + i + ' / ' + totalPages, 190, 293, { align: 'right' });
+    }
+
+    const fileNames = { agri: 'RI_Concessions_Agricoles', flotte: 'RI_Flotte', mre: 'RI_MRE' };
+    doc.save((fileNames[formId] || formId) + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+  }
+</script>
+</body>
+</html>
