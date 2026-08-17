@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formulaires – Crédit Agricole Assurances</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* ─── Design Tokens CAA ─────────────────────────────────── */
+    :root {
+      --caa-bleu-canard:       #009597;
+      --caa-vert-fonce:        #006A4E;
+      --caa-orange:            #ED6842;
+      --caa-vert-prairie:      #9EBE38;
+      --caa-bleu-marine:       #004175;
+      --caa-rouge:             #ED1B2F;
+      --caa-gris-fonce:        #4A4A49;
+      --caa-bleu-canard-clair: #D9EFEF;
+      --caa-vert-fonce-clair:  #D9E9E4;
+      --caa-orange-clair:      #FCE8E3;
+      --caa-vert-prairie-clair:#EDF5DE;
+      --caa-gris-clair:        #E3E3E3;
+
+      /* Typographie */
+      --font-family: "Gotham XNarrow", "Gotham", Arial, sans-serif;
+      --font-weight-bold:   700;
+      --font-weight-medium: 500;
+      --font-weight-book:   400;
+
+      /* Espacement */
+      --space-xs:  4px;
+      --space-s:   8px;
+      --space-m:   16px;
+      --space-l:   24px;
+      --space-xl:  40px;
+      --space-2xl: 56px;
+
+      /* Radius */
+      --radius-s:    4px;
+      --radius-m:    8px;
+      --radius-l:    16px;
+      --radius-full: 9999px;
+    }
+
+    /* ─── Reset & base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      font-weight: var(--font-weight-book);
+      font-size: 15px;
+      color: var(--caa-gris-fonce);       /* texte principal */
+      background: var(--caa-gris-clair);  /* fond page neutre */
+      min-height: 100vh;
+    }
+
+    /* ─── Header ────────────────────────────────────────────── */
+    header {
+      background: #ffffff;
+      padding: var(--space-m) var(--space-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--space-m);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    header svg { height: 52px; width: auto; }
+
+    /* ─── Layout principal ──────────────────────────────────── */
+    main {
+      max-width: 860px;
+      margin: var(--space-xl) auto;
+      padding: 0 var(--space-m);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: var(--font-weight-bold);
+      color: var(--caa-vert-fonce);   /* titre principal vert foncé */
+      margin-bottom: var(--space-l);
+      text-align: center;
+    }
+
+    /* ─── Sélecteur de formulaire (onglets) ─────────────────── */
+    .tab-bar {
+      display: flex;
+      gap: var(--space-s);
+      margin-bottom: var(--space-l);
+      background: #ffffff;
+      border-radius: var(--radius-l);
+      padding: var(--space-s);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: var(--space-m) var(--space-s);
+      border: 2px solid transparent;
+      border-radius: var(--radius-m);
+      background: transparent;
+      font-family: var(--font-family);
+      font-size: 14px;
+      font-weight: var(--font-weight-medium);
+      color: var(--caa-gris-fonce);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* Tab actif : vert foncé */
+    .tab-btn.active {
+      background: var(--caa-vert-fonce);
+      color: #ffffff;
+      border-color: var(--caa-vert-fonce);
+    }
+
+    /* Hover sur tab inactif */
+    .tab-btn:not(.active):hover {
+      background: var(--caa-vert-fonce-clair);
+      border-color: var(--caa-vert-fonce);
+      color: var(--caa-vert-fonce);
+    }
+
+    /* ─── Carte formulaire ──────────────────────────────────── */
+    .form-card {
+      background: #ffffff;
+      border-radius: var(--radius-l);
+      padding: var(--space-xl);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      display: none;  /* masqué par défaut */
+    }
+
+    .form-card.active { display: block; }
+
+    /* Bandeau coloré en tête de formulaire */
+    .form-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-m);
+      padding: var(--space-m) var(--space-l);
+      border-radius: var(--radius-m);
+      margin-bottom: var(--space-xl);
+    }
+
+    /* Couleur spécifique par formulaire */
+    .form-header.agri   { background: var(--caa-vert-fonce-clair); }
+    .form-header.flotte { background: var(--caa-bleu-canard-clair); }
+    .form-header.mre    { background: var(--caa-orange-clair); }
+
+    .form-header h2 {
+      font-size: 18px;
+      font-weight: var(--font-weight-bold);
+      color: var(--caa-vert-fonce);
+    }
+
+    .form-header.flotte h2 { color: var(--caa-bleu-canard); }
+    .form-header.mre h2    { color: var(--caa-orange); }
+
+    .form-header .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .form-header.agri   .icon { background: var(--caa-vert-fonce); color: #fff; }
+    .form-header.flotte .icon { background: var(--caa-bleu-canard); color: #fff; }
+    .form-header.mre    .icon { background: var(--caa-orange); color: #fff; }
+
+    /* ─── Sections & champs ─────────────────────────────────── */
+    .form-section {
+      margin-bottom: var(--space-xl);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: var(--font-weight-bold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--caa-gris-fonce);
+      border-bottom: 2px solid var(--caa-gris-clair);
+      padding-bottom: var(--space-s);
+      margin-bottom: var(--space-l);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-m) var(--space-l);
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      color: var(--caa-gris-fonce);
+    }
+
+    label .required {
+      color: var(--caa-rouge);
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    select,
+    textarea {
+      padding: 10px var(--space-m);
+      border: 1.5px solid var(--caa-gris-clair);
+      border-radius: var(--radius-s);
+      font-family: var(--font-family);
+      font-size: 14px;
+      color: var(--caa-gris-fonce);
+      background: #ffffff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--caa-bleu-canard);
+      box-shadow: 0 0 0 3px rgba(0,149,151,0.15);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    select { cursor: pointer; }
+
+    /* Groupe radio/checkbox */
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-m);
+      margin-top: var(--space-xs);
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-s);
+      font-size: 14px;
+      font-weight: var(--font-weight-book);
+      cursor: pointer;
+    }
+
+    input[type="radio"], input[type="checkbox"] {
+      accent-color: var(--caa-vert-fonce);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* ─── Actions formulaire ────────────────────────────────── */
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-m);
+      padding-top: var(--space-l);
+      border-top: 1px solid var(--caa-gris-clair);
+      margin-top: var(--space-xl);
+    }
+
+    /* Bouton primaire */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-s);
+      padding: 12px var(--space-xl);
+      background: var(--caa-vert-fonce);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-family);
+      font-size: 15px;
+      font-weight: var(--font-weight-medium);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-primary:hover { background: var(--caa-bleu-canard); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    /* Bouton secondaire */
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-s);
+      padding: 12px var(--space-xl);
+      background: transparent;
+      color: var(--caa-vert-fonce);
+      border: 2px solid var(--caa-vert-fonce);
+      border-radius: var(--radius-full);
+      font-family: var(--font-family);
+      font-size: 15px;
+      font-weight: var(--font-weight-medium);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--caa-vert-fonce-clair);
+    }
+
+    /* ─── Toast notification ────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: var(--space-xl);
+      right: var(--space-xl);
+      padding: var(--space-m) var(--space-l);
+      background: var(--caa-vert-fonce);
+      color: #fff;
+      border-radius: var(--radius-m);
+      font-size: 14px;
+      font-weight: var(--font-weight-medium);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── Responsive ────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .tab-btn { font-size: 12px; padding: var(--space-s); }
+      .form-card { padding: var(--space-l); }
+      main { margin: var(--space-l) auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════ HEADER ══════════════════════════════ -->
+<header>
+  <!-- Logo SVG CAA complet (chevrons + lettrage "Assurances") -->
+  <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       viewBox="0 0 236.6 149.3" style="enable-background:new 0 0 236.6 149.3;" xml:space="preserve">
+    <style>.st0{fill:#016A4E;}.st1{fill:#009597;}.st2{fill:#ED1B2F;}</style>
+    <g id="Calque_4">
+      <g>
+        <rect x="49.3" y="92.7" class="st0" width="138.5" height="12.4"/>
+        <g>
+          <path class="st0" d="M137.3,25.3l9.3,23.4l16.5-8.7L148.8,8.3H128L98.8,62.8c0,0,14.4-0.4,23.6-7.4C124.7,54.1,131.3,36.9,137.3,25.3z"/>
+          <path class="st1" d="M163.2,40l-16.5,8.7c-14.1,7.2-27.5,13.6-34.8,15.6c-19.1,5.5-42.3,8.8-50.6,1.4c-7.8-7,10.3-36.1,44.5-42.6c5.6-1.2,8.8-0.9,8.8-0.9s-2.3-10-4.2-12.1c-2.6-3.1-5.1-3.8-8.8-3.3c-7.4,0.4-39,8.9-51.4,35.1c-6.9,14.9,2.3,30,8.3,34.4c2.8,2,20.7,18.1,62.1,1.9C161.4,62.4,198,37.5,198,37.5V20.8C198,20.8,181.9,30,163.2,40z"/>
+          <path class="st0" d="M152.4,63.9c1.5,3.6,5.9,14,7,17c1.5,3.3,5.1,3.3,5.1,3.3h19l-14.2-29.4C164.3,57.7,158.5,60.8,152.4,63.9z"/>
+        </g>
+        <path class="st2" d="M198,14.3c0,0-21.8,12.5-26.9,14.4c-4.7,1.9-6.4-0.6-7-1.5c-1.3-1.9-3.3-8.3-3.6-9.2c0.1,0,1.3,0.3,4.1-0.4C167.9,16.8,198,0,198,0V14.3z"/>
+      </g>
+    </g>
+    <g id="Logo">
+      <g>
+        <path class="st0" d="M16.8,144.2H6.3L4,148.8H0l9.8-19h4.1l9.8,19H19L16.8,144.2z M15.4,141.3l-3.7-7.5L8,141.3H15.4z"/>
+        <path class="st0" d="M26,146.1l1.9-2.7c2.5,1.8,5.8,2.7,8.7,2.7c3,0,5.5-0.9,5.5-2.3c0-1.5-2.7-2-5.9-2.7c-4.3-0.9-9.5-2-9.5-5.8c0-3.5,4.4-5.7,9.4-5.7c3.4,0,7,1,9.6,2.7l-1.9,2.7c-2.1-1.6-5-2.4-7.7-2.4s-5.3,0.8-5.3,2.2c0,1.3,2.5,1.8,5.5,2.4c4.4,0.9,9.9,2,9.9,6.1c0,3.7-4.5,5.9-9.6,5.9C32.7,149.1,28.7,148,26,146.1z"/>
+        <path class="st0" d="M48.8,146.1l1.9-2.7c2.5,1.8,5.8,2.7,8.7,2.7c3,0,5.5-0.9,5.5-2.3c0-1.5-2.7-2-5.9-2.7c-4.3-0.9-9.5-2-9.5-5.8c0-3.5,4.4-5.7,9.4-5.7c3.4,0,7,1,9.6,2.7l-1.9,2.7c-2.1-1.6-5-2.4-7.7-2.4s-5.3,0.8-5.3,2.2c0,1.3,2.5,1.8,5.5,2.4c4.4,0.9,9.9,2,9.9,6.1c0,3.7-4.5,5.9-9.6,5.9C55.6,149.1,51.6,148,48.8,146.1z"/>
+        <path class="st0" d="M72.9,140.3v-10.4H77v10.6c0,3.4,2.4,5.7,5.9,5.7s5.9-2.3,5.9-5.7v-10.7h3.9v10.4c0,5.3-4,8.9-9.9,8.9S72.9,145.6,72.9,140.3z"/>
+        <path class="st0" d="M97.9,129.8h10.3c4.8,0,8.6,1.9,8.6,6.1c0,3.3-2.4,5-5.6,5.7l6.2,7.2h-4.7l-5.6-6.6H102v6.6h-4.1V129.8z M107.8,139.2c2.9,0,4.7-1.2,4.7-3.3c0-2-1.8-3.1-4.7-3.1h-5.9v6.4L107.8,139.2z"/>
+        <path class="st0" d="M136.7,144.2h-10.5l-2.3,4.6h-4.1l9.8-19h4.1l9.8,19H139L136.7,144.2z M135.2,141.3l-3.7-7.5l-3.7,7.5H135.2z"/>
+        <path class="st0" d="M151.4,135.3v13.5h-4.1v-19h4.1l11.6,13.5v-13.5h4.1v19H163L151.4,135.3z"/>
+        <path class="st0" d="M183.2,129.5c2.9,0,6,0.9,8.5,2.7l-1.9,2.5c-2-1.4-3.7-2.2-6.3-2.2c-4.5,0-8,2.8-8,6.9s3.5,6.9,8,6.9c2.7,0,4.5-0.8,6.7-2.3l1.9,2.5c-2.5,1.8-5.7,2.8-8.8,2.8c-6.1,0-11.9-3.6-11.9-9.8C171.3,133.1,177.1,129.5,183.2,129.5z"/>
+        <path class="st0" d="M195.5,143.3v-13.5h17.2v3h-13.1v4.6h12v3h-12v2.9c0,1.7,0.8,2.4,2.4,2.4h11.1v3H201C197.5,148.8,195.5,146.8,195.5,143.3z"/>
+        <path class="st0" d="M216.4,146.1l1.9-2.7c2.5,1.8,5.8,2.7,8.7,2.7c3,0,5.5-0.9,5.5-2.3c0-1.5-2.7-2-5.9-2.7c-4.3-0.9-9.5-2-9.5-5.8c0-3.5,4.4-5.7,9.4-5.7c3.4,0,7,1,9.6,2.7l-1.9,2.7c-2.1-1.6-5-2.4-7.7-2.4s-5.3,0.8-5.3,2.2c0,1.3,2.5,1.8,5.5,2.4c4.4,0.9,9.9,2,9.9,6.1c0,3.7-4.5,5.9-9.6,5.9C223.1,149.1,219.1,148,216.4,146.1z"/>
+      </g>
+    </g>
+  </svg>
+</header>
+
+<!-- ══════════════════════ MAIN ═════════════════════════════════ -->
+<main>
+  <h1>Formulaires de souscription</h1>
+
+  <!-- Sélecteur de formulaire (onglets) -->
+  <nav class="tab-bar" role="tablist" aria-label="Sélection du formulaire">
+    <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="form-agri"   id="tab-agri"   onclick="switchTab('agri')">🌾 Concessions<br>agricoles</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="form-flotte" id="tab-flotte" onclick="switchTab('flotte')">🚗 Flotte</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="form-mre"    id="tab-mre"    onclick="switchTab('mre')">🏠 MRE</button>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════════
+       FORMULAIRE 1 – CONCESSIONS AGRICOLES
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="form-card active" id="form-agri" role="tabpanel" aria-labelledby="tab-agri">
+
+    <div class="form-header agri">
+      <div class="icon" aria-hidden="true">🌾</div>
+      <div>
+        <h2>Concessions agricoles</h2>
+        <p style="font-size:13px;color:var(--caa-gris-fonce);margin-top:2px;">Formulaire de souscription – Contrat agricole</p>
+      </div>
+    </div>
+
+    <form id="formAgri" novalidate>
+
+      <!-- Section 1 – Informations souscripteur -->
+      <div class="form-section">
+        <p class="section-title">Informations souscripteur</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="agri-nom">Nom <span class="required">*</span></label>
+            <input type="text" id="agri-nom" name="nom" placeholder="Nom du souscripteur" required />
+          </div>
+          <div class="field">
+            <label for="agri-prenom">Prénom <span class="required">*</span></label>
+            <input type="text" id="agri-prenom" name="prenom" placeholder="Prénom" required />
+          </div>
+          <div class="field">
+            <label for="agri-siret">Numéro SIRET <span class="required">*</span></label>
+            <input type="text" id="agri-siret" name="siret" placeholder="14 chiffres" maxlength="14" required />
+          </div>
+          <div class="field">
+            <label for="agri-raison">Raison sociale</label>
+            <input type="text" id="agri-raison" name="raison" placeholder="Dénomination de l'exploitation" />
+          </div>
+          <div class="field">
+            <label for="agri-email">Email <span class="required">*</span></label>
+            <input type="email" id="agri-email" name="email" placeholder="contact@exploitation.fr" required />
+          </div>
+          <div class="field">
+            <label for="agri-tel">Téléphone</label>
+            <input type="tel" id="agri-tel" name="tel" placeholder="06 XX XX XX XX" />
+          </div>
+          <div class="field full">
+            <label for="agri-adresse">Adresse de l'exploitation <span class="required">*</span></label>
+            <input type="text" id="agri-adresse" name="adresse" placeholder="N°, rue, lieu-dit" required />
+          </div>
+          <div class="field">
+            <label for="agri-cp">Code postal <span class="required">*</span></label>
+            <input type="text" id="agri-cp" name="cp" placeholder="00000" maxlength="5" required />
+          </div>
+          <div class="field">
+            <label for="agri-ville">Ville <span class="required">*</span></label>
+            <input type="text" id="agri-ville" name="ville" placeholder="Commune" required />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 – Activité agricole -->
+      <div class="form-section">
+        <p class="section-title">Activité agricole</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="agri-type">Type d'exploitation <span class="required">*</span></label>
+            <select id="agri-type" name="type_exploitation" required>
+              <option value="">Sélectionner…</option>
+              <option>Grandes cultures (céréales, oléagineux)</option>
+              <option>Élevage bovin</option>
+              <option>Élevage porcin / volaille</option>
+              <option>Viticulture</option>
+              <option>Maraîchage / Horticulture</option>
+              <option>Arboriculture</option>
+              <option>Polyculture-élevage</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="agri-surface">Surface totale (ha) <span class="required">*</span></label>
+            <input type="number" id="agri-surface" name="surface" placeholder="Ex : 120" min="0" required />
+          </div>
+          <div class="field">
+            <label for="agri-ca">Chiffre d'affaires annuel (€)</label>
+            <input type="number" id="agri-ca" name="ca" placeholder="Ex : 200000" min="0" />
+          </div>
+          <div class="field">
+            <label for="agri-effectif">Nombre de salariés</label>
+            <input type="number" id="agri-effectif" name="effectif" placeholder="Ex : 3" min="0" />
+          </div>
+          <div class="field full">
+            <label>Bâtiments à assurer <span class="required">*</span></label>
+            <div class="radio-group">
+              <label><input type="checkbox" name="batiments" value="hangars" /> Hangars agricoles</label>
+              <label><input type="checkbox" name="batiments" value="serres" /> Serres</label>
+              <label><input type="checkbox" name="batiments" value="silos" /> Silos</label>
+              <label><input type="checkbox" name="batiments" value="caves" /> Cave / chai</label>
+              <label><input type="checkbox" name="batiments" value="elevage" /> Bâtiments d'élevage</label>
+              <label><input type="checkbox" name="batiments" value="autres" /> Autres</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 – Matériels & garanties -->
+      <div class="form-section">
+        <p class="section-title">Matériels & garanties souhaitées</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="agri-valeur-materiel">Valeur du matériel agricole (€)</label>
+            <input type="number" id="agri-valeur-materiel" name="valeur_materiel" placeholder="Ex : 350000" min="0" />
+          </div>
+          <div class="field">
+            <label for="agri-valeur-stock">Valeur des stocks (récoltes, semences) (€)</label>
+            <input type="number" id="agri-valeur-stock" name="valeur_stock" placeholder="Ex : 80000" min="0" />
+          </div>
+          <div class="field full">
+            <label>Garanties souhaitées</label>
+            <div class="radio-group">
+              <label><input type="checkbox" name="garanties_agri" value="incendie" /> Incendie / Foudre</label>
+              <label><input type="checkbox" name="garanties_agri" value="rc" /> Responsabilité civile exploitation</label>
+              <label><input type="checkbox" name="garanties_agri" value="vol" /> Vol / Vandalisme</label>
+              <label><input type="checkbox" name="garanties_agri" value="dommages_eau" /> Dommages aux eaux</label>
+              <label><input type="checkbox" name="garanties_agri" value="pertes_exploitation" /> Pertes d'exploitation</label>
+              <label><input type="checkbox" name="garanties_agri" value="catastrophe" /> Catastrophes naturelles</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="agri-date-effet">Date d'effet souhaitée</label>
+            <input type="date" id="agri-date-effet" name="date_effet" />
+          </div>
+          <div class="field full">
+            <label for="agri-observations">Observations / informations complémentaires</label>
+            <textarea id="agri-observations" name="observations" placeholder="Précisions sur l'activité, sinistres antérieurs…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="resetForm('formAgri')">Réinitialiser</button>
+        <button type="button" class="btn-primary" onclick="generatePDF('agri')">
+          ⬇ Télécharger en PDF
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       FORMULAIRE 2 – FLOTTE
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="form-card" id="form-flotte" role="tabpanel" aria-labelledby="tab-flotte">
+
+    <div class="form-header flotte">
+      <div class="icon" aria-hidden="true">🚗</div>
+      <div>
+        <h2>Flotte automobile</h2>
+        <p style="font-size:13px;color:var(--caa-gris-fonce);margin-top:2px;">Formulaire de souscription – Contrat flotte</p>
+      </div>
+    </div>
+
+    <form id="formFlotte" novalidate>
+
+      <!-- Section 1 – Souscripteur -->
+      <div class="form-section">
+        <p class="section-title">Informations souscripteur</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="fl-raison">Raison sociale <span class="required">*</span></label>
+            <input type="text" id="fl-raison" name="raison" placeholder="Dénomination de la société" required />
+          </div>
+          <div class="field">
+            <label for="fl-siret">Numéro SIRET <span class="required">*</span></label>
+            <input type="text" id="fl-siret" name="siret" placeholder="14 chiffres" maxlength="14" required />
+          </div>
+          <div class="field">
+            <label for="fl-contact">Nom du gestionnaire <span class="required">*</span></label>
+            <input type="text" id="fl-contact" name="contact" placeholder="Nom Prénom" required />
+          </div>
+          <div class="field">
+            <label for="fl-email">Email <span class="required">*</span></label>
+            <input type="email" id="fl-email" name="email" placeholder="gestionnaire@societe.fr" required />
+          </div>
+          <div class="field">
+            <label for="fl-tel">Téléphone</label>
+            <input type="tel" id="fl-tel" name="tel" placeholder="01 XX XX XX XX" />
+          </div>
+          <div class="field">
+            <label for="fl-secteur">Secteur d'activité <span class="required">*</span></label>
+            <select id="fl-secteur" name="secteur" required>
+              <option value="">Sélectionner…</option>
+              <option>Agriculture</option>
+              <option>BTP / Travaux publics</option>
+              <option>Transport / Logistique</option>
+              <option>Commerce / Distribution</option>
+              <option>Services</option>
+              <option>Industrie</option>
+              <option>Autre</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 – Composition de la flotte -->
+      <div class="form-section">
+        <p class="section-title">Composition de la flotte</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="fl-nb-vl">Nombre de véhicules légers (VL)</label>
+            <input type="number" id="fl-nb-vl" name="nb_vl" placeholder="Ex : 12" min="0" />
+          </div>
+          <div class="field">
+            <label for="fl-nb-vul">Nombre de véhicules utilitaires légers (VUL)</label>
+            <input type="number" id="fl-nb-vul" name="nb_vul" placeholder="Ex : 5" min="0" />
+          </div>
+          <div class="field">
+            <label for="fl-nb-pl">Nombre de poids lourds (PL)</label>
+            <input type="number" id="fl-nb-pl" name="nb_pl" placeholder="Ex : 3" min="0" />
+          </div>
+          <div class="field">
+            <label for="fl-nb-engins">Nombre d'engins de chantier / agricoles</label>
+            <input type="number" id="fl-nb-engins" name="nb_engins" placeholder="Ex : 2" min="0" />
+          </div>
+          <div class="field">
+            <label for="fl-valeur-flotte">Valeur vénale totale de la flotte (€) <span class="required">*</span></label>
+            <input type="number" id="fl-valeur-flotte" name="valeur_flotte" placeholder="Ex : 450000" min="0" required />
+          </div>
+          <div class="field">
+            <label for="fl-anciennete">Ancienneté moyenne de la flotte</label>
+            <select id="fl-anciennete" name="anciennete">
+              <option value="">Sélectionner…</option>
+              <option>Moins de 2 ans</option>
+              <option>2 à 5 ans</option>
+              <option>5 à 10 ans</option>
+              <option>Plus de 10 ans</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="fl-usage">Usage principal des véhicules <span class="required">*</span></label>
+            <select id="fl-usage" name="usage" required>
+              <option value="">Sélectionner…</option>
+              <option>Déplacements professionnels (salariés)</option>
+              <option>Livraison de marchandises</option>
+              <option>Transport de personnes</option>
+              <option>Chantiers / travaux</option>
+              <option>Usage mixte</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 – Sinistralité & garanties -->
+      <div class="form-section">
+        <p class="section-title">Sinistralité & garanties souhaitées</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="fl-sinistres-3ans">Nombre de sinistres sur les 3 dernières années</label>
+            <input type="number" id="fl-sinistres-3ans" name="sinistres_3ans" placeholder="Ex : 4" min="0" />
+          </div>
+          <div class="field">
+            <label for="fl-cout-sinistres">Coût total sinistres sur 3 ans (€)</label>
+            <input type="number" id="fl-cout-sinistres" name="cout_sinistres" placeholder="Ex : 25000" min="0" />
+          </div>
+          <div class="field full">
+            <label>Garanties souhaitées <span class="required">*</span></label>
+            <div class="radio-group">
+              <label><input type="checkbox" name="garanties_flotte" value="rc" /> Responsabilité civile</label>
+              <label><input type="checkbox" name="garanties_flotte" value="tous_risques" /> Tous risques</label>
+              <label><input type="checkbox" name="garanties_flotte" value="vol" /> Vol / Incendie</label>
+              <label><input type="checkbox" name="garanties_flotte" value="bris_glace" /> Bris de glace</label>
+              <label><input type="checkbox" name="garanties_flotte" value="dm" /> Dommages matériels</label>
+              <label><input type="checkbox" name="garanties_flotte" value="protection_conducteur" /> Protection du conducteur</label>
+              <label><input type="checkbox" name="garanties_flotte" value="assistance" /> Assistance / Dépannage</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="fl-franchise">Franchise souhaitée (€)</label>
+            <select id="fl-franchise" name="franchise">
+              <option value="">Sélectionner…</option>
+              <option>Pas de franchise</option>
+              <option>300 €</option>
+              <option>500 €</option>
+              <option>1 000 €</option>
+              <option>2 000 €</option>
+              <option>Autre (préciser)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fl-date-effet">Date d'effet souhaitée</label>
+            <input type="date" id="fl-date-effet" name="date_effet" />
+          </div>
+          <div class="field full">
+            <label for="fl-observations">Observations / informations complémentaires</label>
+            <textarea id="fl-observations" name="observations" placeholder="Contrat en cours, particularités de la flotte…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="resetForm('formFlotte')">Réinitialiser</button>
+        <button type="button" class="btn-primary" onclick="generatePDF('flotte')">
+          ⬇ Télécharger en PDF
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       FORMULAIRE 3 – MRE
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="form-card" id="form-mre" role="tabpanel" aria-labelledby="tab-mre">
+
+    <div class="form-header mre">
+      <div class="icon" aria-hidden="true">🏠</div>
+      <div>
+        <h2>MRE – Multirisque de l'Entreprise</h2>
+        <p style="font-size:13px;color:var(--caa-gris-fonce);margin-top:2px;">Formulaire de souscription – Contrat MRE</p>
+      </div>
+    </div>
+
+    <form id="formMRE" novalidate>
+
+      <!-- Section 1 – Souscripteur -->
+      <div class="form-section">
+        <p class="section-title">Informations souscripteur</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="mre-raison">Raison sociale <span class="required">*</span></label>
+            <input type="text" id="mre-raison" name="raison" placeholder="Dénomination de la société" required />
+          </div>
+          <div class="field">
+            <label for="mre-siret">Numéro SIRET <span class="required">*</span></label>
+            <input type="text" id="mre-siret" name="siret" placeholder="14 chiffres" maxlength="14" required />
+          </div>
+          <div class="field">
+            <label for="mre-contact">Nom du dirigeant / interlocuteur <span class="required">*</span></label>
+            <input type="text" id="mre-contact" name="contact" placeholder="Nom Prénom" required />
+          </div>
+          <div class="field">
+            <label for="mre-email">Email <span class="required">*</span></label>
+            <input type="email" id="mre-email" name="email" placeholder="dirigeant@entreprise.fr" required />
+          </div>
+          <div class="field">
+            <label for="mre-tel">Téléphone</label>
+            <input type="tel" id="mre-tel" name="tel" placeholder="01 XX XX XX XX" />
+          </div>
+          <div class="field">
+            <label for="mre-forme-juridique">Forme juridique</label>
+            <select id="mre-forme-juridique" name="forme_juridique">
+              <option value="">Sélectionner…</option>
+              <option>EI – Entrepreneur individuel</option>
+              <option>EURL</option>
+              <option>SARL</option>
+              <option>SAS / SASU</option>
+              <option>SA</option>
+              <option>SCI</option>
+              <option>Association</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="mre-naf">Code NAF / APE</label>
+            <input type="text" id="mre-naf" name="naf" placeholder="Ex : 4711F" maxlength="5" />
+          </div>
+          <div class="field">
+            <label for="mre-ca">Chiffre d'affaires annuel (€) <span class="required">*</span></label>
+            <input type="number" id="mre-ca" name="ca" placeholder="Ex : 500000" min="0" required />
+          </div>
+          <div class="field">
+            <label for="mre-effectif">Effectif salarié</label>
+            <input type="number" id="mre-effectif" name="effectif" placeholder="Ex : 8" min="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 – Locaux & biens assurés -->
+      <div class="form-section">
+        <p class="section-title">Locaux & biens assurés</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label for="mre-adresse-risque">Adresse du risque principal <span class="required">*</span></label>
+            <input type="text" id="mre-adresse-risque" name="adresse_risque" placeholder="N°, rue, ville, code postal" required />
+          </div>
+          <div class="field">
+            <label for="mre-qualite">Qualité de l'occupant <span class="required">*</span></label>
+            <select id="mre-qualite" name="qualite" required>
+              <option value="">Sélectionner…</option>
+              <option>Propriétaire occupant</option>
+              <option>Locataire</option>
+              <option>Propriétaire non occupant</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="mre-surface-locaux">Surface des locaux (m²) <span class="required">*</span></label>
+            <input type="number" id="mre-surface-locaux" name="surface_locaux" placeholder="Ex : 350" min="0" required />
+          </div>
+          <div class="field">
+            <label for="mre-valeur-immo">Valeur des biens immobiliers à assurer (€)</label>
+            <input type="number" id="mre-valeur-immo" name="valeur_immo" placeholder="Ex : 800000" min="0" />
+          </div>
+          <div class="field">
+            <label for="mre-valeur-contenu">Valeur du contenu / mobilier pro (€) <span class="required">*</span></label>
+            <input type="number" id="mre-valeur-contenu" name="valeur_contenu" placeholder="Ex : 120000" min="0" required />
+          </div>
+          <div class="field">
+            <label for="mre-valeur-matinfo">Valeur du matériel informatique (€)</label>
+            <input type="number" id="mre-valeur-matinfo" name="valeur_matinfo" placeholder="Ex : 30000" min="0" />
+          </div>
+          <div class="field full">
+            <label>Type de construction</label>
+            <div class="radio-group">
+              <label><input type="radio" name="construction" value="dur" /> Matériaux durs (béton, brique)</label>
+              <label><input type="radio" name="construction" value="mixte" /> Mixte</label>
+              <label><input type="radio" name="construction" value="leger" /> Matériaux légers (bois, métal)</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="mre-nb-locaux">Nombre de sites / locaux à assurer</label>
+            <input type="number" id="mre-nb-locaux" name="nb_locaux" placeholder="Ex : 2" min="1" />
+          </div>
+          <div class="field">
+            <label for="mre-alarme">Système de protection</label>
+            <select id="mre-alarme" name="alarme">
+              <option value="">Sélectionner…</option>
+              <option>Aucun</option>
+              <option>Alarme anti-intrusion</option>
+              <option>Vidéosurveillance</option>
+              <option>Alarme + vidéosurveillance</option>
+              <option>Télésurveillance</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 – Garanties souhaitées -->
+      <div class="form-section">
+        <p class="section-title">Garanties & options souhaitées</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Garanties souhaitées <span class="required">*</span></label>
+            <div class="radio-group">
+              <label><input type="checkbox" name="garanties_mre" value="incendie" /> Incendie / Explosion / Foudre</label>
+              <label><input type="checkbox" name="garanties_mre" value="dommages_eau" /> Dommages aux eaux</label>
+              <label><input type="checkbox" name="garanties_mre" value="vol" /> Vol / Vandalisme</label>
+              <label><input type="checkbox" name="garanties_mre" value="bris_glace" /> Bris de glace / vitrines</label>
+              <label><input type="checkbox" name="garanties_mre" value="rc_pro" /> RC professionnelle</label>
+              <label><input type="checkbox" name="garanties_mre" value="pertes_exploitation" /> Pertes d'exploitation</label>
+              <label><input type="checkbox" name="garanties_mre" value="catastrophe_nat" /> Catastrophes naturelles</label>
+              <label><input type="checkbox" name="garanties_mre" value="cyber" /> Risques cyber</label>
+              <label><input type="checkbox" name="garanties_mre" value="protection_juridique" /> Protection juridique</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="mre-franchise">Franchise souhaitée (€)</label>
+            <select id="mre-franchise" name="franchise">
+              <option value="">Sélectionner…</option>
+              <option>Pas de franchise</option>
+              <option>500 €</option>
+              <option>1 000 €</option>
+              <option>2 000 €</option>
+              <option>5 000 €</option>
+              <option>Autre (préciser)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="mre-date-effet">Date d'effet souhaitée</label>
+            <input type="date" id="mre-date-effet" name="date_effet" />
+          </div>
+          <div class="field full">
+            <label for="mre-sinistres">Sinistres déclarés sur les 3 dernières années</label>
+            <textarea id="mre-sinistres" name="sinistres" placeholder="Nature, date et montant des sinistres éventuels…"></textarea>
+          </div>
+          <div class="field full">
+            <label for="mre-observations">Observations / informations complémentaires</label>
+            <textarea id="mre-observations" name="observations" placeholder="Contrat en cours, activités spécifiques, annexes…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="resetForm('formMRE')">Réinitialiser</button>
+        <button type="button" class="btn-primary" onclick="generatePDF('mre')">
+          ⬇ Télécharger en PDF
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<!-- Toast de confirmation de téléchargement -->
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<!-- ══════════════════════ JAVASCRIPT ═══════════════════════════ -->
+<script>
+  /* ── Gestion des onglets ─────────────────────────────────── */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.form-card').forEach(card => card.classList.remove('active'));
+
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('tab-' + name).setAttribute('aria-selected', 'true');
+    document.getElementById('form-' + name).classList.add('active');
+  }
+
+  /* ── Réinitialisation ────────────────────────────────────── */
+  function resetForm(formId) {
+    document.getElementById(formId).reset();
+  }
+
+  /* ── Toast ───────────────────────────────────────────────── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  /* ── Collecte des données d'un formulaire ────────────────── */
+  function collectFormData(formId) {
+    const form = document.getElementById(formId);
+    const data = [];
+
+    form.querySelectorAll('input, select, textarea').forEach(el => {
+      if (!el.name) return;
+
+      // Checkboxes et radios
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        if (el.checked) {
+          const label = el.closest('label') ? el.closest('label').textContent.trim() : el.value;
+          const existing = data.find(d => d.name === el.name);
+          if (existing) {
+            existing.value += ', ' + label;
+          } else {
+            const groupLabel = el.closest('.field')?.querySelector('label:first-child')?.textContent.trim() || el.name;
+            data.push({ label: groupLabel.replace(' *', ''), name: el.name, value: label });
+          }
+        } else if (!data.find(d => d.name === el.name)) {
+          // Ajouter le groupe même s'il est vide (pour ne pas le manquer)
+          // On ne l'ajoute que si aucune case n'est cochée → géré après
+        }
+        return;
+      }
+
+      // Champs standards
+      const labelEl = form.querySelector(`label[for="${el.id}"]`);
+      const labelText = labelEl ? labelEl.textContent.replace(' *', '').trim() : el.name;
+      if (el.value.trim()) {
+        data.push({ label: labelText, name: el.name, value: el.value.trim() });
+      }
+    });
+
+    return data;
+  }
+
+  /* ── Génération PDF ─────────────────────────────────────── */
+  function generatePDF(formType) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const titles = {
+      agri:   'Concessions Agricoles',
+      flotte: 'Flotte Automobile',
+      mre:    'Multirisque de l\'Entreprise (MRE)'
+    };
+
+    const formIds = { agri: 'formAgri', flotte: 'formFlotte', mre: 'formMRE' };
+    const colors  = {
+      agri:   { r: 0,   g: 106, b: 78  },   /* --caa-vert-fonce */
+      flotte: { r: 0,   g: 149, b: 151 },   /* --caa-bleu-canard */
+      mre:    { r: 237, g: 104, b: 66  }    /* --caa-orange */
+    };
+
+    const col = colors[formType];
+    const pageW = 210, pageH = 297;
+    const margin = 16, colW = pageW - margin * 2;
+
+    /* ── En-tête de page ─────────────────────────────────── */
+    doc.setFillColor(col.r, col.g, col.b);
+    doc.rect(0, 0, pageW, 28, 'F');
+
+    doc.setFontSize(15);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('Crédit Agricole Assurances', margin, 11);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Formulaire de souscription – ' + titles[formType], margin, 19);
+
+    // Date de génération
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR') + ' à ' + now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255, 0.8);
+    doc.text('Généré le ' + dateStr, pageW - margin, 24, { align: 'right' });
+
+    /* ── Corps ───────────────────────────────────────────── */
+    let y = 38;
+    const lineH    = 7;
+    const labelW   = 80;
+
+    function checkPageBreak(needed) {
+      if (y + needed > pageH - 16) {
+        doc.addPage();
+        // Bandeau mini en haut de page suivante
+        doc.setFillColor(col.r, col.g, col.b);
+        doc.rect(0, 0, pageW, 10, 'F');
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(255, 255, 255);
+        doc.text('Crédit Agricole Assurances – ' + titles[formType], margin, 7);
+        y = 18;
+      }
+    }
+
+    function drawSectionTitle(title) {
+      checkPageBreak(12);
+      doc.setFillColor(col.r, col.g, col.b);
+      doc.rect(margin, y, colW, 7, 'F');
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text(title.toUpperCase(), margin + 3, y + 5);
+      y += 11;
+    }
+
+    function drawField(labelText, value) {
+      if (!value || !value.trim()) return;
+      checkPageBreak(lineH + 2);
+
+      // Fond alterné léger
+      doc.setFillColor(247, 250, 248);
+      doc.rect(margin, y, colW, lineH, 'F');
+
+      // Label
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(col.r, col.g, col.b);
+      const lbl = labelText.length > 38 ? labelText.substring(0, 36) + '…' : labelText;
+      doc.text(lbl, margin + 2, y + 4.8);
+
+      // Valeur (avec wrap si nécessaire)
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(74, 74, 73);
+      const valueX = margin + labelW;
+      const valueW = colW - labelW - 2;
+      const lines  = doc.splitTextToSize(value, valueW);
+
+      if (lines.length > 1) {
+        checkPageBreak(lines.length * lineH);
+        doc.setFillColor(247, 250, 248);
+        doc.rect(margin, y, colW, lines.length * lineH, 'F');
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(col.r, col.g, col.b);
+        doc.text(lbl, margin + 2, y + 4.8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(74, 74, 73);
+        lines.forEach((line, i) => {
+          doc.text(line, valueX, y + 4.8 + i * lineH);
+        });
+        y += lines.length * lineH + 1;
+      } else {
+        doc.text(value, valueX, y + 4.8);
+        y += lineH + 1;
+      }
+    }
+
+    /* ── Récupération et rendu des données ───────────────── */
+    const data = collectFormData(formIds[formType]);
+
+    // Sections par formulaire
+    const sectionMap = {
+      agri: {
+        'Informations souscripteur': ['nom','prenom','siret','raison','email','tel','adresse','cp','ville'],
+        'Activité agricole':         ['type_exploitation','surface','ca','effectif','batiments'],
+        'Matériels & garanties':     ['valeur_materiel','valeur_stock','garanties_agri','date_effet','observations']
+      },
+      flotte: {
+        'Informations souscripteur': ['raison','siret','contact','email','tel','secteur'],
+        'Composition de la flotte':  ['nb_vl','nb_vul','nb_pl','nb_engins','valeur_flotte','anciennete','usage'],
+        'Sinistralité & garanties':  ['sinistres_3ans','cout_sinistres','garanties_flotte','franchise','date_effet','observations']
+      },
+      mre: {
+        'Informations souscripteur': ['raison','siret','contact','email','tel','forme_juridique','naf','ca','effectif'],
+        'Locaux & biens assurés':    ['adresse_risque','qualite','surface_locaux','valeur_immo','valeur_contenu','valeur_matinfo','construction','nb_locaux','alarme'],
+        'Garanties & options':       ['garanties_mre','franchise','date_effet','sinistres','observations']
+      }
+    };
+
+    const sections = sectionMap[formType];
+    Object.keys(sections).forEach(sectionTitle => {
+      const fields = sections[sectionTitle];
+      const sectionData = data.filter(d => fields.includes(d.name));
+      if (sectionData.length > 0) {
+        drawSectionTitle(sectionTitle);
+        sectionData.forEach(d => drawField(d.label, d.value));
+        y += 4;
+      }
+    });
+
+    /* ── Pied de page ────────────────────────────────────── */
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFillColor(240, 240, 240);
+      doc.rect(0, pageH - 12, pageW, 12, 'F');
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(74, 74, 73);
+      doc.text('Crédit Agricole Assurances – Document interne – Confidentiel', margin, pageH - 5);
+      doc.text('Page ' + i + ' / ' + totalPages, pageW - margin, pageH - 5, { align: 'right' });
+    }
+
+    /* ── Téléchargement ─────────────────────────────────── */
+    const filename = `CAA_${titles[formType].replace(/[^a-zA-Z0-9]/g, '_')}_${now.toISOString().slice(0,10)}.pdf`;
+    doc.save(filename);
+    showToast('✅ PDF téléchargé avec succès !');
+  }
+</script>
+</body>
+</html>
